@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang='zh-CN'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'><title>仓库拣货作业</title><style>
+:root{--sidebar-dark:#001529;--sidebar-sub:#000c17;--primary:#1890ff;--primary-hover:#40a9ff;--bg:#f0f2f5;--border:#e8e8e8;--text:#333;--muted:#888;--success:#52c41a;--warning:#faad14;--danger:#f5222d;--purple:#722ed1}*{box-sizing:border-box;margin:0;padding:0;font-family:'PingFang SC','Microsoft YaHei',Arial,sans-serif}body{height:100vh;background:var(--bg);color:var(--text);font-size:13px;display:flex;overflow:hidden}.primary-sidebar{width:85px;background:var(--sidebar-dark);display:flex;flex-direction:column;align-items:center;padding-top:15px;flex-shrink:0}.ps-logo{width:40px;height:40px;background:#123a5f;border-radius:8px;margin-bottom:20px}.ps-item{width:100%;padding:15px 0;display:flex;flex-direction:column;align-items:center;color:#a6adb4;gap:6px;font-size:12px}.ps-item.active{background:var(--primary);color:#fff}.secondary-sidebar{width:180px;background:var(--sidebar-sub);flex-shrink:0}.ss-header{height:60px;display:flex;align-items:center;padding-left:20px;color:#fff;font-weight:bold;font-size:15px}.tree-node{padding:12px 20px;color:#a6adb4;border-left:3px solid transparent}.tree-node.active{color:var(--primary);border-left-color:var(--primary);background:rgba(24,144,255,.1)}.main-wrapper{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}.top-header{height:60px;background:var(--sidebar-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 25px;font-size:18px;font-style:italic;font-weight:bold}.top-tools{font-size:14px;font-style:normal;font-weight:normal}.tabs-bar{height:45px;background:#fafafa;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 15px;gap:5px}.tab-item{padding:10px 18px;color:#666;border-bottom:2px solid transparent}.tab-item.active{background:#fff;color:var(--primary);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;position:relative;top:1px;font-weight:bold}.page-content{flex:1;margin:15px;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:20px;display:flex;flex-direction:column;overflow:hidden}.toolbar{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;border-bottom:1px dashed var(--border);padding-bottom:16px}.filter-item{display:flex;flex-direction:column;gap:6px}.filter-item label{font-weight:bold;color:#333}.input,.select{height:34px;border:1px solid #d9d9d9;border-radius:4px;padding:0 10px;background:#fff;min-width:160px}.readonly{background:#f7f7f7;color:#555}.btn{height:34px;padding:0 14px;border:1px solid #d9d9d9;background:#fff;border-radius:4px;cursor:pointer}.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn:hover{border-color:var(--primary);color:var(--primary)}.btn-primary:hover{background:var(--primary-hover);color:#fff}.table-wrap{flex:1;overflow:auto;border:1px solid var(--border);border-radius:4px}.data-table{width:100%;border-collapse:collapse;table-layout:fixed}.data-table th{background:#fafafa;color:#666;font-weight:normal;border-bottom:1px solid var(--border);padding:12px 10px;position:sticky;top:0;z-index:2}.data-table td{border-bottom:1px solid #f0f0f0;padding:12px 10px;vertical-align:middle;line-height:1.5}.data-table tr:hover td{background:#fafafa}.ta-center{text-align:center}.ta-right{text-align:right}.muted{color:#888;font-size:12px}.tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:3px;font-size:12px;border:1px solid transparent;white-space:nowrap}.tag-blue{background:#e6f7ff;color:var(--primary);border-color:#91d5ff}.tag-green{background:#f6ffed;color:var(--success);border-color:#b7eb8f}.tag-orange{background:#fff7e6;color:var(--warning);border-color:#ffd591}.tag-red{background:#fff1f0;color:var(--danger);border-color:#ffa39e}.tag-gray{background:#f5f5f5;color:#777;border-color:#ddd}.action-link{color:var(--primary);cursor:pointer;margin:0 4px;white-space:nowrap}.action-link:hover{text-decoration:underline}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;z-index:999999}.modal-box{width:760px;max-width:calc(100vw - 80px);max-height:88vh;background:#fff;border-radius:8px;box-shadow:0 6px 28px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}.modal-header{height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:16px;font-weight:bold}.modal-body{padding:20px;overflow:auto}.modal-footer{height:58px;border-top:1px solid var(--border);background:#fafafa;display:flex;justify-content:flex-end;gap:10px;padding:12px 20px}.close{cursor:pointer;color:#999;font-size:18px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 20px}.form-item{display:flex;flex-direction:column;gap:7px}.form-item label{font-weight:bold;color:#555}.full{grid-column:1/-1}.mini-table{width:100%;border-collapse:collapse;margin-top:10px}.mini-table th,.mini-table td{border-bottom:1px solid #eee;padding:10px;text-align:left}.toast{position:fixed;right:25px;top:25px;background:#001529;color:#fff;padding:10px 16px;border-radius:4px;box-shadow:0 3px 12px rgba(0,0,0,.2);display:none;z-index:1000000}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.detail-card{background:#f8faff;border:1px solid #e6f7ff;border-radius:6px;padding:12px}.detail-label{font-size:12px;color:#777;margin-bottom:6px}.detail-value{font-size:15px;font-weight:bold;color:#333}.section-title{font-size:14px;font-weight:bold;margin:4px 0 10px}.config-card{border:1px solid var(--border);border-radius:6px;margin-bottom:15px;padding:16px;background:#fff}.config-title{font-weight:bold;margin-bottom:12px;font-size:14px}.config-row{display:grid;grid-template-columns:180px 220px 1fr;align-items:center;gap:15px;border-top:1px solid #f3f3f3;padding:12px 0}.config-row:first-of-type{border-top:0}.switch{display:inline-flex;align-items:center;gap:8px}.switch input{width:16px;height:16px}
+@keyframes flashSuccess{0%{background:#f6ffed}100%{background:transparent}}
+
+/* layout-fix-20260708 */
+
+.table-container,.table-wrap{ overflow:auto !important; }
+.data-table{ min-width:1580px !important; table-layout:auto !important; width:100% !important; }
+.data-table th,.data-table td{ white-space:nowrap; word-break:normal; padding:12px 14px !important; }
+.data-table td strong,.data-table td b{ white-space:nowrap; }
+.data-table .muted{ display:block; white-space:nowrap; line-height:1.35; }
+.data-table .ta-right{ min-width:96px; }
+.data-table .ta-center{ min-width:96px; }
+.action-link{ white-space:nowrap; }
+
+
+/* SKU_LEVEL_BOX_FIX */
+.sku-box-detail{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:12px;color:#5f6b7a;line-height:1.45;}
+.sku-box-line{display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.sku-box-line b{color:#1f2937;}
+.sku-box-code{display:inline-block;max-width:150px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;color:#0050b3;font-weight:600;}
+.sku-box-total{margin-top:4px;color:#1677ff;font-weight:600;white-space:nowrap;}
+.qty-cell{display:flex;flex-direction:column;gap:4px;align-items:flex-end;line-height:1.35;}
+.qty-main{font-weight:600;color:#1f2937;}
+.qty-box{font-size:12px;color:#1677ff;white-space:nowrap;}
+.table-container,.table-wrap,.table-scroll,.table-wrapper{overflow-x:auto;}
+table{border-collapse:collapse;}
+th,td{vertical-align:middle;}
+
+</style>
+<style id="job-print-list-style">
+.job-select-head,.job-select-cell{width:42px!important;text-align:center!important;padding-left:8px!important;padding-right:8px!important;}
+.job-select-cell input,.job-select-head input{width:16px;height:16px;cursor:pointer;}
+.job-work-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.job-work-actions .btn{white-space:nowrap;}
+.job-printed-mark{display:inline-block;margin-top:4px;font-size:12px;color:#1677ff;background:#e6f4ff;border:1px solid #91caff;border-radius:3px;padding:1px 5px;}
+
+.job-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1000002;}
+.job-preview-box{width:min(1120px,calc(100vw - 64px));max-height:88vh;background:#fff;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;}
+.job-preview-head{height:54px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:16px;font-weight:600;}
+.job-preview-close{cursor:pointer;color:#999;font-size:20px;line-height:1;}
+.job-preview-body{padding:18px;overflow:auto;background:#f5f7fa;}
+.job-preview-paper{background:#fff;border:1px solid #d9d9d9;padding:22px;margin:0 auto;box-shadow:0 2px 10px rgba(0,0,0,.06);min-width:960px;color:#111;}
+.job-preview-title{text-align:center;font-size:22px;font-weight:700;letter-spacing:2px;margin-bottom:14px;}
+.job-preview-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;font-size:13px;}
+.job-preview-meta div{border-bottom:1px solid #333;padding:5px 0;}
+.job-preview-table{width:100%;border-collapse:collapse;table-layout:auto;font-size:13px;}
+.job-preview-table th,.job-preview-table td{border:1px solid #333;padding:7px 8px;text-align:left;vertical-align:top;line-height:1.45;}
+.job-preview-table th{background:#f2f2f2;text-align:center;}
+.job-preview-sign{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:28px;}
+.job-preview-sign div{border-bottom:1px solid #333;padding:18px 0 6px;}
+.job-preview-foot{height:58px;border-top:1px solid #e8e8e8;background:#fafafa;display:flex;justify-content:flex-end;gap:10px;padding:12px 18px;}
+@media print{.primary-sidebar,.secondary-sidebar,.top-header,.tabs-bar,.toolbar,.action-link,.btn,.job-select-head,.job-select-cell{display:none!important}.page-content{margin:0!important;box-shadow:none!important;border-radius:0!important}.table-wrap{border:none!important;overflow:visible!important}}
+</style>
+</head><body>
+<div class='primary-sidebar'><div class='ps-logo'></div><div class='ps-item '><span>□</span><span>首页</span></div><div class='ps-item '><span>□</span><span>主数据</span></div><div class='ps-item '><span>□</span><span>订单管理</span></div><div class='ps-item '><span>□</span><span>生产管理</span></div><div class='ps-item active'><span>□</span><span>仓库管理</span></div><div class='ps-item '><span>□</span><span>采购管理</span></div><div class='ps-item '><span>□</span><span>物流管理</span></div><div class='ps-item '><span>□</span><span>财务管理</span></div></div>
+<div class='secondary-sidebar'><div class='ss-header'>□ 仓库管理</div><div class='tree-menu'><div class='tree-node '>仓库任务中心</div><div class='tree-node active'>仓库拣货作业</div><div class='tree-node '>成品入库确认</div><div class='tree-node '>成品出库确认</div><div class='tree-node '>原材料出库确认</div><div class='tree-node '>库存台账查询</div><div class='tree-node '>盘点与调账</div></div></div>
+<div class='main-wrapper'><div class='top-header'><div>宏通塑料鞋业ERP制造执行系统</div><div class='top-tools'>□ □ □ 管理员</div></div><div class='tabs-bar'><div class='tab-item'>仓库管理</div><div class='tab-item active'>仓库拣货作业</div></div><div class='page-content'>
+
+<div class="toolbar"><div class="filter-item"><label>发运批次</label><input class="input" placeholder="请输入"></div><div class="filter-item"><label>客户/销售单</label><input class="input" placeholder="请输入"></div><div class="filter-item"><label>拣货状态</label><select class="select"><option>全部</option><option>待拣货</option><option>已核对待确认</option><option>待出库确认</option></select></div><button class="btn">搜索</button><button class="btn">重置</button><button class="btn btn-primary" onclick="openPickModal(this)">确认拣货完成</button></div>
+<div class="table-wrap"><table class="data-table"><thead><tr><th style="width:13%">发运批次</th><th style="width:17%">客户/销售单</th><th style="width:20%">待拣成品</th><th style="width:13%">箱码/装箱</th><th style="width:9%" class="ta-right">应拣数量</th><th style="width:9%" class="ta-right">已拣数量</th><th style="width:10%" class="ta-center">核对状态</th><th style="width:10%" class="ta-center">状态</th><th style="width:10%" class="ta-center">操作</th></tr></thead><tbody>
+<tr><td>PICK-240601-01</td><td>广州十三行<br><span class="muted">ORD-008</span></td><td><strong>E677 蓝色 40码</strong><br><span class="muted">推荐库位：成品A区-A01</span></td><td><b>BOX-E677-BL-40</b><br><span class="muted">60双/箱 · 8箱+20双</span></td><td class="ta-right">500</td><td class="ta-right">500</td><td class="ta-center"><span class="tag tag-green">已核对</span></td><td class="ta-center"><span class="tag tag-orange">待出库确认</span></td><td class="ta-center"><span class="action-link" onclick="openModal('modal-scan-detail')">查看明细</span></td></tr>
+<tr><td>PICK-240601-01</td><td>广州十三行<br><span class="muted">ORD-008</span></td><td><strong>R90 黑色 均码</strong><br><span class="muted">推荐库位：成品B区-B02</span></td><td><b>BOX-R90-BK-FREE</b><br><span class="muted">20双/箱 · 15箱</span></td><td class="ta-right">300</td><td class="ta-right">0</td><td class="ta-center"><span class="tag tag-gray">手工核对</span></td><td class="ta-center"><span class="tag tag-orange row-status">待拣货</span></td><td class="ta-center row-actions"><span class="action-link" onclick="openPickModal(this)">手工确认</span></td></tr>
+
+<tr><td>PICK-240601-09</td><td>广州十三行<br><span class="muted">ORD-008 / RET-240601-01</span></td><td><strong>E677 蓝色 42码</strong><br><span class="muted">退货申请审核中，暂不允许拣货</span></td><td><b>BOX-E677-BL-42</b><br><span class="muted">60双/箱 · 16箱+40双</span></td><td class="ta-right">1,000</td><td class="ta-right">0</td><td class="ta-center"><span class="tag tag-gray">未核对</span></td><td class="ta-center"><span class="tag tag-red">退货冻结</span></td><td class="ta-center"><span class="action-link" onclick="openModal('modal-return-freeze')">查看原因</span></td></tr>
+
+<tr><td>PICK-240601-12</td><td>东莞批发客户<br><span class="muted">ORD-250526-011</span></td><td><strong>E677 粉色 38码</strong><br><span class="muted">已拣 1,000 / 应拣 2,600</span></td><td><b>BOX-E677-PK-38</b><br><span class="muted">60双/箱 · 43箱+20双</span></td><td class="ta-right">2,600</td><td class="ta-right">1,000</td><td class="ta-center"><span class="tag tag-gray">手工核对</span></td><td class="ta-center"><span class="tag tag-orange">拣货中</span></td><td class="ta-center"><span class="action-link" onclick="openPickModal(this)">继续处理</span></td></tr>
+<tr><td>PICK-240530-03</td><td>佛山连锁门店<br><span class="muted">ORD-250515-020</span></td><td><strong>E677 白色 38-42码</strong><br><span class="muted">已复核并移交出库</span></td><td><b>BOX-E677-WH-MIX</b><br><span class="muted">60双/箱 · 30箱</span></td><td class="ta-right">1,800</td><td class="ta-right">1,800</td><td class="ta-center"><span class="tag tag-green">已核对</span></td><td class="ta-center"><span class="tag tag-green">已完成</span></td><td class="ta-center"><span class="action-link" onclick="openModal('modal-scan-detail')">明细</span></td></tr>
+
+</tbody></table></div>
+<div id="modal-pick-task" class="modal-overlay"><div class="modal-box"><div class="modal-header">拣货任务处理 <span class="close" onclick="closeModal('modal-pick-task')">×</span></div><div class="modal-body"><table class="mini-table"><thead><tr><th>成品SKU</th><th>箱码/装箱</th><th>应拣</th><th>已拣</th><th>核对状态</th><th>处理方式</th><th>本次确认</th></tr></thead><tbody><tr><td>E677 蓝色 40码</td><td>BOX-E677-BL-40<br><span class="muted">60双/箱 · 8箱+20双</span></td><td>500</td><td>500</td><td><span class="tag tag-green">已核对</span></td><td><span class="tag tag-blue">核对结果确认</span></td><td><input class="input" value="500" style="width:100px;text-align:right"></td></tr><tr><td>R90 黑色 均码</td><td>BOX-R90-BK-FREE<br><span class="muted">20双/箱 · 15箱</span></td><td>300</td><td>0</td><td><span class="tag tag-gray">手工核对</span></td><td><span class="tag tag-gray">手工确认</span></td><td><input class="input" value="300" style="width:100px;text-align:right"></td></tr></tbody></table></div><div class="modal-footer"><button class="btn" onclick="closeModal('modal-pick-task')">取消</button><button class="btn" onclick="showToast('拣货进度已保存')">保存进度</button><button class="btn btn-primary" onclick="confirmPickComplete()">确认拣货完成</button></div></div></div>
+<div id="modal-scan-detail" class="modal-overlay"><div class="modal-box"><div class="modal-header">拣货核对明细 <span class="close" onclick="closeModal('modal-scan-detail')">×</span></div><div class="modal-body"><div class="detail-grid"><div class="detail-card"><div class="detail-label">核对时间</div><div class="detail-value">2026-06-01 14:05</div></div><div class="detail-card"><div class="detail-label">已拣数量</div><div class="detail-value">500 双</div></div><div class="detail-card"><div class="detail-label">拣货人员</div><div class="detail-value">仓管员 王工</div></div></div><table class="mini-table"><thead><tr><th>箱码</th><th>SKU</th><th>装箱规格</th><th>数量</th><th>库位</th><th>状态</th></tr></thead><tbody><tr><td>BOX-E677-BL-40</td><td>E677 蓝色 40码</td><td>60双/箱</td><td>已核对 8箱+20双</td><td>成品A区-A01</td><td><span class="tag tag-green">已核对</span></td></tr><tr><td colspan="5" class="ta-center muted">按箱码规则核对，剩余箱数已省略显示</td></tr></tbody></table></div><div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('modal-scan-detail')">关闭</button></div></div></div>
+
+</div></div>
+<div id='toast' class='toast'></div><script>
+function $(id){return document.getElementById(id)}
+let currentPickRow=null;
+function showToast(msg){const t=$('toast'); if(!t)return; t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1800)}
+function openModal(id){const el=$(id); if(el) el.style.display='flex'}
+function closeModal(id){const el=$(id); if(el) el.style.display='none'}
+function openPickModal(trigger){ currentPickRow = trigger ? trigger.closest('tr') : null; openModal('modal-pick-task'); }
+function confirmPickComplete(){
+  if(currentPickRow){
+    currentPickRow.children[4].textContent = currentPickRow.children[3].textContent;
+    currentPickRow.children[5].innerHTML = '<span class="tag tag-green">已核对</span>';
+    currentPickRow.children[6].innerHTML = '<span class="tag tag-orange row-status">待出库确认</span>';
+    currentPickRow.children[7].innerHTML = '<span class="tag tag-gray">已推送出库</span>';
+    currentPickRow.style.animation='flashSuccess 1.5s ease';
+  }
+  closeModal('modal-pick-task');
+  showToast('拣货已完成，下一节点：成品出库确认');
+}
+function confirmRow(btn, statusText){ const tr=btn.closest('tr'); if(!tr)return; const status=tr.querySelector('.row-status'); if(status){status.className='tag tag-green row-status'; status.textContent=statusText||'已完成'} const actions=tr.querySelector('.row-actions'); if(actions) actions.innerHTML='<span class="tag tag-gray">待出库</span>'; showToast('操作成功'); }
+</script>
+<script id="job-print-list-script">
+(function(){
+  const JOB_CONFIG = { title: "拣货作业清单", type: "拣货", confirmedStatus: "已拣货待确认" };
+  const STORE_KEY = 'erp_warehouse_print_work_lists';
+  function pad(n){return String(n).padStart(2,'0')}
+  function nowText(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())}
+  function docNo(){const d=new Date();return (JOB_CONFIG.type==='拣货'?'PK':JOB_CONFIG.type==='发料'?'MI':JOB_CONFIG.type==='出库'?'OUT':'IN')+'-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds())}
+  function read(key){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return []}}
+  function write(key,val){localStorage.setItem(key, JSON.stringify(val))}
+  function toastMsg(msg){
+    if(typeof window.toast==='function'){ try{ window.toast(msg); return; }catch(e){} }
+    const old=document.getElementById('job-toast'); if(old) old.remove();
+    const el=document.createElement('div'); el.id='job-toast'; el.textContent=msg; el.style.cssText='position:fixed;right:24px;top:24px;z-index:1000001;background:#001529;color:#fff;padding:10px 16px;border-radius:4px;box-shadow:0 3px 12px rgba(0,0,0,.22);font-size:13px;'; document.body.appendChild(el); setTimeout(()=>el.remove(),1800);
+  }
+  function getTables(){ return Array.from(document.querySelectorAll('.page-content table')).filter(t=>t.querySelector('thead') && t.querySelector('tbody')); }
+  function enhanceTables(){
+    getTables().forEach(table=>{
+      const headRow=table.querySelector('thead tr');
+      if(headRow && !headRow.querySelector('.job-select-head')){
+        const th=document.createElement('th'); th.className='job-select-head'; th.innerHTML='<input type="checkbox" title="全选本页" onchange="window.__toggleJobWorkListAll(this)">'; headRow.insertBefore(th, headRow.firstElementChild);
+      }
+      table.querySelectorAll('tbody tr').forEach((tr,idx)=>{
+        if(tr.querySelector('td[colspan]')) return;
+        let td=tr.querySelector('.job-select-cell');
+        if(!td){ td=document.createElement('td'); td.className='job-select-cell'; tr.insertBefore(td, tr.firstElementChild); }
+        if(isJobSelectableRow(tr)){
+          if(!td.querySelector('.job-row-check')) td.innerHTML='<input type="checkbox" class="job-row-check" title="选择打印">';
+          const check=td.querySelector('.job-row-check');
+          check.disabled=false;
+        }else{
+          td.innerHTML='<span class="muted">—</span>';
+        }
+      });
+    });
+  }
+  function insertActions(){
+    const toolbar=document.querySelector('.page-content .toolbar') || document.querySelector('.toolbar');
+    if(!toolbar || toolbar.querySelector('.job-work-actions')) return;
+    const wrap=document.createElement('div'); wrap.className='job-work-actions';
+    wrap.innerHTML='<button class="btn" type="button" onclick="window.__selectPendingWorkRows()">选择待处理</button><button class="btn btn-primary" type="button" onclick="window.__printJobWorkList()">预览作业清单</button>';
+    toolbar.appendChild(wrap);
+  }
+  function selectedRows(){ enhanceTables(); return Array.from(document.querySelectorAll('.job-row-check:checked')).map(c=>c.closest('tr')).filter(tr=>tr && isJobSelectableRow(tr)); }
+  function rowCells(tr){ return Array.from(tr.children).filter(td=>!td.classList.contains('job-select-cell')); }
+  function cleanText(el){ return (el.innerText||'').replace(/\s+/g,' ').trim(); }
+  function isJobSelectableRow(tr){
+    const text=cleanText(tr);
+    if(!text || tr.querySelector('td[colspan]')) return false;
+    if(/(已核对|已完成|已入库|已出库|已发料|已拣货|已确认|已退回|退货冻结|拒收|取消|作废)/.test(text)) return false;
+    return /(待|未|手工|需|处理中|归集中)/.test(text);
+  }
+  function headersFor(table){ return Array.from(table.querySelectorAll('thead th')).filter(th=>!th.classList.contains('job-select-head')).map(th=>cleanText(th)).filter(Boolean).filter(h=>h!=='操作'); }
+  function buildRows(rows){
+    const table=rows[0]?.closest('table'); const headers=headersFor(table||document.querySelector('table'));
+    return rows.map((tr,i)=>{
+      const cells=rowCells(tr).map(td=>cleanText(td));
+      if(cells.length && /查看|确认|手工|来源|批次|入库单|出库单|详情/.test(cells[cells.length-1])) cells.pop();
+      return { index:i+1, cells };
+    });
+  }
+  function markPrinted(rows,no){
+    rows.forEach(tr=>{
+      const first=rowCells(tr)[0];
+      if(first && !first.querySelector('.job-printed-mark')){ const m=document.createElement('div'); m.className='job-printed-mark'; m.textContent='已打印 '+no; first.appendChild(m); }
+    });
+  }
+  window.__toggleJobWorkListAll=function(box){
+    const table=box.closest('table'); table.querySelectorAll('.job-row-check').forEach(c=>{ if(!c.disabled && isJobSelectableRow(c.closest('tr'))) c.checked=box.checked; });
+  };
+  window.__selectPendingWorkRows=function(){
+    enhanceTables();
+    let count=0;
+    document.querySelectorAll('.page-content tbody tr').forEach(tr=>{
+      const text=cleanText(tr);
+      const check=tr.querySelector('.job-row-check');
+      if(check && !check.disabled && isJobSelectableRow(tr)){ check.checked=true; count++; }
+    });
+    toastMsg('已选择 '+count+' 条待处理任务');
+  };
+  function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
+  function buildWorkListPayload(){
+    const rows=selectedRows();
+    if(!rows.length){toastMsg('请先勾选需要打印的任务');return null;}
+    const no=docNo();
+    const headers=headersFor(rows[0].closest('table')).filter(h=>h!=='操作');
+    const data=buildRows(rows);
+    const ths=['序号'].concat(headers).map(h=>'<th>'+escapeHtml(h)+'</th>').join('');
+    const trs=data.map(r=>'<tr><td>'+r.index+'</td>'+r.cells.map(c=>'<td>'+escapeHtml(c)+'</td>').join('')+'</tr>').join('');
+    return { no, rows, headers, data, ths, trs, time: nowText() };
+  }
+  function ensurePreviewModal(){
+    let modal=document.getElementById('job-work-preview-modal');
+    if(modal) return modal;
+    modal=document.createElement('div');
+    modal.id='job-work-preview-modal';
+    modal.className='job-preview-overlay';
+    modal.innerHTML='<div class="job-preview-box"><div class="job-preview-head"><span>作业清单预览</span><span class="job-preview-close" onclick="window.__closeJobWorkPreview()">×</span></div><div class="job-preview-body"><div class="job-preview-paper" id="job-work-preview-paper"></div></div><div class="job-preview-foot"><button class="btn" type="button" onclick="window.__closeJobWorkPreview()">取消</button><button class="btn btn-primary" type="button" onclick="window.__confirmPrintJobWorkList()">打印</button></div></div>';
+    document.body.appendChild(modal);
+    return modal;
+  }
+  function renderPreviewHtml(payload){
+    return '<div class="job-preview-title">'+escapeHtml(JOB_CONFIG.title)+'</div>'+
+      '<div class="job-preview-meta"><div>清单编号：'+escapeHtml(payload.no)+'</div><div>作业类型：'+escapeHtml(JOB_CONFIG.type)+'</div><div>任务数量：'+payload.rows.length+' 条</div><div>打印时间：'+escapeHtml(payload.time)+'</div></div>'+
+      '<table class="job-preview-table"><thead><tr>'+payload.ths+'</tr></thead><tbody>'+payload.trs+'</tbody></table>'+
+      '<div class="job-preview-sign"><div>搬货员签字：</div><div>仓管员签字：</div><div>确认人签字：</div><div>确认日期：</div></div>';
+  }
+  function printHtml(payload){
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+escapeHtml(JOB_CONFIG.title)+'</title><style>body{font-family:"Microsoft YaHei",Arial,sans-serif;color:#111;padding:22px;font-size:13px}.print-head{text-align:center;margin-bottom:14px}.print-title{font-size:24px;font-weight:bold;letter-spacing:2px}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 12px}.meta div{border-bottom:1px solid #333;padding:5px 0}table{width:100%;border-collapse:collapse;table-layout:auto}th,td{border:1px solid #333;padding:7px 8px;text-align:left;vertical-align:top;line-height:1.45}th{background:#f2f2f2;text-align:center}.sign{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:28px}.sign div{border-bottom:1px solid #333;padding:18px 0 6px}@media print{@page{size:A4 landscape;margin:10mm}body{padding:0}}</style></head><body><div class="print-head"><div class="print-title">'+escapeHtml(JOB_CONFIG.title)+'</div></div><div class="meta"><div>清单编号：'+escapeHtml(payload.no)+'</div><div>作业类型：'+escapeHtml(JOB_CONFIG.type)+'</div><div>任务数量：'+payload.rows.length+' 条</div><div>打印时间：'+escapeHtml(payload.time)+'</div></div><table><thead><tr>'+payload.ths+'</tr></thead><tbody>'+payload.trs+'</tbody></table><div class="sign"><div>搬货员签字：</div><div>仓管员签字：</div><div>确认人签字：</div><div>确认日期：</div></div></body></html>';
+  }
+  window.__closeJobWorkPreview=function(){ const modal=document.getElementById('job-work-preview-modal'); if(modal) modal.style.display='none'; };
+  window.__printJobWorkList=function(){
+    const payload=buildWorkListPayload(); if(!payload) return;
+    window.__jobWorkListPreviewPayload=payload;
+    const modal=ensurePreviewModal();
+    const paper=document.getElementById('job-work-preview-paper');
+    if(paper) paper.innerHTML=renderPreviewHtml(payload);
+    modal.style.display='flex';
+  };
+  window.__confirmPrintJobWorkList=function(){
+    const payload=window.__jobWorkListPreviewPayload;
+    if(!payload || !payload.rows || !payload.rows.length){toastMsg('预览数据已失效，请重新选择任务');return;}
+    const list=read(STORE_KEY); list.unshift({no:payload.no,type:JOB_CONFIG.type,title:JOB_CONFIG.title,time:payload.time,count:payload.rows.length,rows:payload.data}); write(STORE_KEY,list.slice(0,80)); markPrinted(payload.rows,payload.no);
+    const win=window.open('', '_blank'); if(!win){toastMsg('浏览器拦截了打印窗口，请允许弹窗');return;}
+    win.document.write(printHtml(payload)); win.document.close(); setTimeout(()=>{win.focus(); win.print();},300);
+    window.__closeJobWorkPreview();
+  };
+  function boot(){ enhanceTables(); insertActions(); const obs=new MutationObserver(()=>enhanceTables()); document.querySelectorAll('.page-content tbody').forEach(tb=>obs.observe(tb,{childList:true})); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+
+<style id="qty-box-convert-style">
+.qty-box-convert{display:block;margin-top:3px;color:#64748b;font-size:12px;line-height:1.25;white-space:nowrap}.qty-box-convert b{color:#334155;font-weight:600}.qty-box-convert.warn{color:#b45309}
+</style>
+<script id="qty-box-convert-helper">
+(function(){
+  if(window.__qtyBoxConvertInstalled) return;
+  window.__qtyBoxConvertInstalled = true;
+  function cleanNumber(s){return Number(String(s||'').replace(/[,，\s]/g,'')) || 0;}
+  function inferPackSize(rowText){
+    rowText = String(rowText||'').toUpperCase();
+    var m = rowText.match(/每箱\s*(\d+)|([0-9]+)\s*双\s*\/\s*箱|([0-9]+)\s*双每箱/);
+    if(m) return Number(m[1]||m[2]||m[3]) || 60;
+    if(/R90|拖鞋扣|配件|辅料/.test(rowText)) return 20;
+    return 60;
+  }
+  function boxText(qty, pack){
+    qty = cleanNumber(qty); pack = cleanNumber(pack) || 60;
+    if(!qty || qty < pack) return '';
+    var box = Math.floor(qty / pack), loose = qty % pack;
+    return box + '箱' + (loose ? ' + ' + loose + '双' : '') + ' · 每箱' + pack + '双';
+  }
+  function shouldSkipCell(cell){
+    if(!cell || cell.querySelector('.qty-box-convert')) return true;
+    var t = cell.innerText || '';
+    if(/箱\s*\+|\d+箱|箱码|每箱/.test(t)) return true;
+    if(cell.querySelector('input,select,textarea,button')) return true;
+    return false;
+  }
+  function enhance(root){
+    root = root || document;
+    var cells = root.querySelectorAll('td, .detail-card .detail-value, .info-value, .sales-stat-card strong, .kpi b');
+    cells.forEach(function(cell){
+      if(shouldSkipCell(cell)) return;
+      var t = cell.innerText || '';
+      var m = t.match(/(^|[^0-9])([0-9][0-9,，]*)\s*双(?!\s*\/\s*箱)/);
+      if(!m) return;
+      var qty = cleanNumber(m[2]);
+      var rowText = (cell.closest('tr') && cell.closest('tr').innerText) || (cell.closest('.modal,.content,.page') && cell.closest('.modal,.content,.page').innerText) || document.body.innerText || '';
+      var pack = inferPackSize(rowText);
+      var text = boxText(qty, pack);
+      if(!text) return;
+      var span = document.createElement('span');
+      span.className = 'qty-box-convert';
+      span.innerHTML = '箱数：<b>' + text + '</b>';
+      cell.appendChild(span);
+    });
+  }
+  window.renderQtyBoxConversion = function(){ enhance(document); };
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(enhance, 80); });
+  else setTimeout(enhance, 80);
+  var obs = new MutationObserver(function(muts){
+    var changed = false;
+    for(var i=0;i<muts.length;i++){
+      if(muts[i].addedNodes && muts[i].addedNodes.length){ changed = true; break; }
+    }
+    if(changed) setTimeout(enhance, 120);
+  });
+  try{ obs.observe(document.body, {childList:true, subtree:true}); }catch(e){}
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宏通塑料鞋业 ERP - 全链路订单跟踪</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --sidebar-dark:#001529;
+      --sidebar-sub:#000c17;
+      --primary:#1890ff;
+      --primary-hover:#40a9ff;
+      --bg-body:#f0f2f5;
+      --border:#e8e8e8;
+      --text-main:#333;
+      --text-muted:#8c8c8c;
+      --danger:#f5222d;
+      --success:#52c41a;
+      --warning:#faad14;
+      --purple:#722ed1;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;}
+    body{height:100vh;overflow:hidden;display:flex;background:var(--bg-body);color:var(--text-main);font-size:13px;}
+    input,select,button,textarea{outline:none;font-family:inherit;}
+    .primary-sidebar{width:85px;background:var(--sidebar-dark);display:flex;flex-direction:column;align-items:center;padding-top:15px;z-index:100;flex-shrink:0;border-right:1px solid #000;}
+    .ps-logo{width:40px;height:40px;background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>') center/contain no-repeat;margin-bottom:20px;}
+    .ps-item{width:100%;padding:15px 0;display:flex;flex-direction:column;align-items:center;color:#a6adb4;cursor:pointer;transition:.2s;font-size:12px;gap:6px;}
+    .ps-item i{font-size:20px;}
+    .ps-item:hover,.ps-item.active{background:var(--primary);color:#fff;}
+    .secondary-sidebar{width:180px;background:var(--sidebar-sub);border-right:1px solid #000;display:flex;flex-direction:column;flex-shrink:0;z-index:90;}
+    .ss-header{height:60px;display:flex;align-items:center;padding-left:18px;color:#fff;font-size:15px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,.05);}
+    .tree-menu{padding:10px 0;overflow-y:auto;flex:1;}
+    .tree-node{padding:12px 18px;cursor:pointer;display:flex;align-items:center;font-size:13px;color:#a6adb4;transition:.2s;border-left:3px solid transparent;gap:8px;}
+    .tree-node:hover{color:#fff;}
+    .tree-node.active{color:var(--primary);border-left-color:var(--primary);background:rgba(24,144,255,.1);}
+    .main-wrapper{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-body);}
+    .top-header{height:60px;background:var(--sidebar-dark);border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;padding:0 25px;color:#fff;font-style:italic;font-size:18px;font-weight:bold;letter-spacing:1px;}
+    .top-tools{display:flex;align-items:center;gap:20px;font-size:16px;font-style:normal;font-weight:normal;}
+    .tabs-bar{height:45px;background:#fafafa;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 15px;gap:5px;z-index:10;}
+    .tab-item{padding:10px 20px;font-size:13px;color:#666;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;}
+    .tab-item.active{background:#fff;color:var(--primary);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;position:relative;top:1px;font-weight:bold;}
+    .page-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#fff;margin:15px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+    .toolbar{padding:16px 18px;border-bottom:1px solid #f0f0f0;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;background:#fff;}
+    .filter-item{display:flex;flex-direction:column;gap:7px;}
+    .filter-item label{font-weight:bold;color:#333;font-size:13px;}
+    .input-box{height:34px;padding:6px 10px;border:1px solid #d9d9d9;border-radius:4px;font-size:13px;min-width:180px;background:#fff;}
+    select.input-box{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%23999" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;padding-right:28px;}
+    .input-box:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(24,144,255,.18);}
+    .btn{height:34px;padding:0 14px;border-radius:4px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;transition:.2s;background:#fff;}
+    .btn-outline{border-color:#d9d9d9;color:#333;}
+    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+    .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .btn-primary:hover{background:var(--primary-hover);}
+    .table-container{flex:1;overflow:auto;padding:0 18px 18px;background:#fff;}
+    table{width:100%;border-collapse:collapse;text-align:left;table-layout:fixed;}
+    th{background:#fafafa;padding:12px 10px;color:#666;font-weight:500;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;white-space:nowrap;}
+    td{padding:13px 10px;border-bottom:1px solid #f0f0f0;color:#333;vertical-align:middle;}
+    tr:hover td{background:#fafafa;}
+    .order-no{font-weight:bold;color:var(--primary);font-size:14px;cursor:pointer;}
+    .sub{font-size:12px;color:#666;margin-top:4px;line-height:1.45;}
+    .mini{font-size:12px;color:#999;margin-top:3px;}
+    .status-tag{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:4px;font-size:12px;border:1px solid transparent;white-space:nowrap;line-height:20px;}
+    .tag-blue{background:#e6f7ff;color:var(--primary);border-color:#91d5ff;}
+    .tag-green{background:#f6ffed;color:var(--success);border-color:#b7eb8f;}
+    .tag-orange{background:#fff7e6;color:var(--warning);border-color:#ffd591;}
+    .tag-red{background:#fff1f0;color:var(--danger);border-color:#ffa39e;}
+    .tag-gray{background:#f5f5f5;color:#777;border-color:#d9d9d9;}
+    .tag-purple{background:#f9f0ff;color:var(--purple);border-color:#d3adf7;}
+    .chain-mini{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+    .chain-node{font-size:12px;padding:2px 7px;border-radius:12px;border:1px solid #e5e5e5;background:#fafafa;color:#777;}
+    .chain-node.done{background:#f6ffed;color:var(--success);border-color:#b7eb8f;}
+    .chain-node.active{background:#e6f7ff;color:var(--primary);border-color:#91d5ff;font-weight:bold;}
+    .chain-node.warn{background:#fff7e6;color:var(--warning);border-color:#ffd591;}
+    .chain-node.error{background:#fff1f0;color:var(--danger);border-color:#ffa39e;}
+    .action-link{color:var(--primary);cursor:pointer;text-decoration:none;font-weight:500;margin-right:10px;white-space:nowrap;}
+    .action-link:hover{text-decoration:underline;}
+    .num-right{text-align:right;font-family:Consolas,monospace;}
+
+    .drawer-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;justify-content:flex-end;z-index:1200;}
+    .drawer-mask.show{display:flex;}
+    .detail-drawer{width:92vw;max-width:1280px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.18);display:flex;flex-direction:column;animation:slideIn .2s ease;}
+    @keyframes slideIn{from{transform:translateX(25px);opacity:.6;}to{transform:translateX(0);opacity:1;}}
+    .drawer-header{height:60px;padding:0 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .drawer-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:bold;}
+    .drawer-close{font-size:20px;color:#999;cursor:pointer;transition:.2s;}
+    .drawer-close:hover{color:var(--danger);transform:rotate(90deg);}
+    .drawer-body{flex:1;overflow:auto;padding:18px 22px;background:#f7f8fa;}
+    .overview-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:14px;}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;}
+    .summary-item{background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;}
+    .summary-label{font-size:12px;color:#777;margin-bottom:6px;}
+    .summary-value{font-size:15px;font-weight:bold;color:#333;line-height:1.4;}
+    .progress-line{display:flex;align-items:center;margin-top:16px;overflow-x:auto;padding-bottom:4px;}
+    .step{display:flex;align-items:center;min-width:86px;}
+    .step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #d9d9d9;background:#fff;color:#999;z-index:2;}
+    .step.done .step-dot{border-color:var(--success);background:var(--success);color:#fff;}
+    .step.active .step-dot{border-color:var(--primary);background:var(--primary);color:#fff;}
+    .step.warn .step-dot{border-color:var(--warning);background:var(--warning);color:#fff;}
+    .step.error .step-dot{border-color:var(--danger);background:var(--danger);color:#fff;}
+    .step-text{font-size:12px;margin-left:6px;white-space:nowrap;color:#666;}
+    .step-line{height:2px;min-width:30px;flex:1;background:#d9d9d9;margin:0 6px;}
+    .step-line.done{background:var(--success);}
+    .section-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .section-card{background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+    .section-card.wide{grid-column:1 / -1;}
+    .section-header{height:44px;padding:0 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;font-weight:bold;background:#fff;}
+    .section-title{display:flex;align-items:center;gap:8px;color:#333;}
+    .section-body{padding:14px;}
+    .kv-grid{display:grid;grid-template-columns:120px 1fr 120px 1fr;gap:10px 12px;font-size:13px;line-height:1.6;}
+    .kv-label{color:#888;text-align:right;}
+    .kv-value{color:#333;font-weight:500;}
+    .small-table{width:100%;table-layout:auto;font-size:12px;}
+    .small-table th{position:static;padding:9px 8px;background:#fafafa;color:#666;font-weight:500;}
+    .small-table td{padding:9px 8px;border-bottom:1px dashed #eee;}
+    .small-table tr:last-child td{border-bottom:none;}
+    .cost-card-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+    .cost-card{border:1px solid #f0f0f0;border-radius:6px;background:#fafafa;padding:10px;}
+    .cost-label{font-size:12px;color:#777;margin-bottom:6px;}
+    .cost-value{font-size:16px;font-weight:bold;font-family:Consolas,monospace;}
+    .timeline{border-left:2px dashed #d9d9d9;margin-left:8px;padding-left:18px;}
+    .tl-item{position:relative;padding-bottom:16px;}
+    .tl-item:last-child{padding-bottom:0;}
+    .tl-item::before{content:'';position:absolute;left:-26px;top:4px;width:12px;height:12px;border-radius:50%;background:#ccc;border:3px solid #fff;box-shadow:0 0 0 1px #d9d9d9;}
+    .tl-item.done::before{background:var(--success);}
+    .tl-item.active::before{background:var(--primary);}
+    .tl-item.warn::before{background:var(--warning);}
+    .tl-item.error::before{background:var(--danger);}
+    .tl-title{font-weight:bold;color:#333;margin-bottom:4px;display:flex;justify-content:space-between;gap:10px;}
+    .tl-time{font-size:12px;color:#999;font-weight:normal;white-space:nowrap;}
+    .tl-desc{font-size:12px;color:#666;line-height:1.6;background:#fafafa;border:1px solid #f0f0f0;border-radius:4px;padding:9px;}
+    .drawer-footer{height:56px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:0 20px;background:#fff;}
+    @media(max-width:1100px){.section-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.cost-card-grid{grid-template-columns:repeat(2,1fr)}.kv-grid{grid-template-columns:110px 1fr}}
+  
+/* layout-fix-20260708 */
+
+.box-count-mini{ margin-top:4px; color:#64748b; font-size:12px; white-space:nowrap; }
+.table-container, .table-wrap{ overflow:auto !important; }
+table{ table-layout:auto !important; }
+th,td{ word-break:normal; }
+
+
+/* SKU_LEVEL_BOX_FIX */
+.sku-box-detail{margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:12px;color:#5f6b7a;line-height:1.45;}
+.sku-box-line{display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.sku-box-line b{color:#1f2937;}
+.sku-box-code{display:inline-block;max-width:150px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom;color:#0050b3;font-weight:600;}
+.sku-box-total{margin-top:4px;color:#1677ff;font-weight:600;white-space:nowrap;}
+.qty-cell{display:flex;flex-direction:column;gap:4px;align-items:flex-end;line-height:1.35;}
+.qty-main{font-weight:600;color:#1f2937;}
+.qty-box{font-size:12px;color:#1677ff;white-space:nowrap;}
+.table-container,.table-wrap,.table-scroll,.table-wrapper{overflow-x:auto;}
+table{border-collapse:collapse;}
+th,td{vertical-align:middle;}
+
+</style>
+</head>
+<body>
+  <div class="primary-sidebar">
+    <div class="ps-logo"></div>
+    <div class="ps-item"><i class="fa-solid fa-house"></i><span>首页</span></div>
+    <div class="ps-item"><i class="fa-solid fa-database"></i><span>主数据</span></div>
+    <div class="ps-item active"><i class="fa-solid fa-file-invoice-dollar"></i><span>订单管理</span></div>
+    <div class="ps-item"><i class="fa-solid fa-industry"></i><span>生产管理</span></div>
+    <div class="ps-item"><i class="fa-solid fa-warehouse"></i><span>仓库管理</span></div>
+    <div class="ps-item"><i class="fa-solid fa-cart-shopping"></i><span>采购管理</span></div>
+    <div class="ps-item"><i class="fa-solid fa-truck"></i><span>物流管理</span></div>
+    <div class="ps-item"><i class="fa-solid fa-money-check-dollar"></i><span>财务管理</span></div>
+  </div>
+
+  <div class="secondary-sidebar">
+    <div class="ss-header"><i class="fa-solid fa-file-invoice-dollar" style="margin-right:8px;color:var(--primary);"></i> 订单管理</div>
+    <div class="tree-menu">
+      <div class="tree-node"><i class="fa-solid fa-file-pen"></i> 订单录入与校验</div>
+      <div class="tree-node"><i class="fa-solid fa-user-check"></i> 多级订单审核</div>
+      <div class="tree-node active"><i class="fa-solid fa-route"></i> 全链路订单跟踪</div>
+      <div class="tree-node"><i class="fa-solid fa-rotate-left"></i> 退货/售后处理</div>
+      <div class="tree-node"><i class="fa-solid fa-chart-pie"></i> 订单统计导出</div>
+    </div>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="top-header">
+      <div>宏通塑料鞋业ERP制造执行系统</div>
+      <div class="top-tools">
+        <i class="fa-solid fa-expand"></i><i class="fa-solid fa-magnifying-glass"></i><i class="fa-regular fa-bell"></i>
+        <div style="font-size:14px;margin-left:10px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-user-circle" style="font-size:20px;"></i> 超级管理员</div>
+      </div>
+    </div>
+    <div class="tabs-bar">
+      <div class="tab-item">订单管理</div>
+      <div class="tab-item active"><span style="color:var(--primary);">全链路订单跟踪 <i class="fa-solid fa-xmark" style="margin-left:5px;font-size:10px;"></i></span></div>
+    </div>
+
+    <div class="page-content">
+      <div class="toolbar">
+        <div class="filter-item"><label>订单 / 客户</label><input class="input-box" placeholder="请输入订单号或客户"></div>
+        <div class="filter-item"><label>订单状态</label><select class="input-box"><option>全部</option><option>待审核</option><option>已审核</option><option>待算料</option><option>已生成生产计划</option><option>已生成生产工单</option><option>生产中</option><option>待质检</option><option>已入库</option><option>待拣货</option><option>待出库</option><option>已出库</option><option>已发货</option><option>已签收</option><option>预计应收</option><option>待确认应收</option><option>正式应收</option><option>已完成</option><option>退货处理中</option><option>已取消</option></select></div>
+        <div class="filter-item"><label>交付风险</label><select class="input-box"><option>全部</option><option>正常</option><option>缺料预警</option><option>品质异常</option><option>逾期收款</option></select></div>
+        <div class="filter-item"><label>日期范围</label><input type="date" class="input-box"></div>
+        <button class="btn btn-outline"><i class="fa-solid fa-magnifying-glass"></i> 查询</button>
+        <button class="btn btn-outline"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:18%;">订单信息</th>
+              <th style="width:10%;">当前状态</th>
+              <th style="width:26%;">链路进度</th>
+              <th style="width:18%;">关键进展</th>
+              <th style="width:12%;text-align:right;">金额 / 毛利</th>
+              <th style="width:10%;">风险</th>
+              <th style="width:6%;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="orderRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-mask" id="detailDrawer" onclick="maskClose(event)">
+    <div class="detail-drawer" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <div class="drawer-title"><i class="fa-solid fa-route" style="color:var(--primary);"></i><span id="drawerTitle">订单全链路详情</span></div>
+        <i class="fa-solid fa-xmark drawer-close" onclick="closeDetail()"></i>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" onclick="window.print()"><i class="fa-solid fa-print"></i> 打印</button>
+        <button class="btn btn-outline" onclick="closeDetail()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const orders = [
+      {
+        id:'ORD-250530-007', customer:'广州十三行张总', product:'E677 夏季防滑凉拖', status:'生产中', statusClass:'tag-blue', risk:'品质异常', riskClass:'tag-red', amount:268000, cost:198500, margin:69500, marginRate:'25.9%',
+        progress:['审核','算料','计划','领料','生产'], active:'生产',
+        summary:'生产中。',
+        order:{date:'2025-05-30', delivery:'2025-06-18', qty:'5,000 双', payment:'30%预付款，尾款发货后结', owner:'业务一部 / 陈丽'},
+        audit:[['销售主管','已通过','2025-05-30 15:20','客户余额充足，订单价格正常'],['财务复核','已通过','2025-05-30 16:05','已确认预收款 ¥80,400']],
+        plan:{evalNo:'已生成计划', stock:'未执行库存占用', produce:'计划生成 5,000 双', workOrder:'WO-250530-007', planStatus:'已生成生产计划工单'},
+        mrp:[['PVC大料','大料','需求 420kg','库存充足','已生成领料'],['蓝色色母','配饰','需求 12kg','库存充足','已生成领料'],['包装袋','配饰','需求 5,000个','缺口 800个','采购跟进中']],
+        purchase:[['PO-250531-003','包装袋','采购中','预计 06-04 到货'],['MI-250601-006','PVC/色母','已领料','仓库已发 432kg']],
+        report:[['06-01 09:30','注塑成型','良品 +650双','机台 1号 / 张三'],['06-01 13:40','注塑成型','良品 +520双','机台 1号 / 李四']],
+        qc:[['OQC-250601-002','抽检','已检 120双','不合格 6双','气泡/毛边，已返工']],
+        inbound:[['IN-250601-018','成品入库','良品 1,100双','待二次入库','成本归集中']],
+        shipping:[['未生成','库存部分待生成发货单','可发 3,800双','待处理']],
+        finance:{receivable:'¥268,000', paid:'¥80,400', pending:'¥187,600', balance:'使用客户余额抵扣 ¥0', status:'正式应收 / 部分收款'},
+        cost:{material:'¥112,800', labor:'¥28,600', overhead:'¥19,400', loss:'¥3,200', unit:'¥39.70/双'}
+      },
+      {
+        id:'ORD-250526-011', customer:'东莞批发客户', product:'E677 粉色凉拖', status:'已入库 / 待生成发货单', statusClass:'tag-green', risk:'正常', riskClass:'tag-blue', amount:156000, cost:111800, margin:44200, marginRate:'28.3%',
+        progress:['审核','算料','计划','生产','质检','入库'], active:'入库',
+        summary:'生产与质检已完成，成品入库 2,600 双，待生成发货单。',
+        order:{date:'2025-05-26', delivery:'2025-06-06', qty:'2,600 双', payment:'货到后 7 天结', owner:'业务二部 / 王敏'},
+        audit:[['销售主管','已通过','2025-05-26 11:10','价格与交期通过'],['财务复核','已通过','2025-05-26 11:40','账期正常']],
+        plan:{evalNo:'已生成计划', stock:'未占用库存', produce:'计划生产 2,600 双', workOrder:'WO-250526-011', planStatus:'已完工入库'},
+        mrp:[['PVC大料','大料','需求 930kg','库存充足','已领料'],['粉色色母','配饰','需求 26kg','库存充足','已领料'],['外箱','配饰','需求 260个','库存充足','已领料']],
+        purchase:[['无','本单无新增采购','-','-'],['MI-250527-004','生产领料','已完成','仓库已发料']],
+        report:[['05-28 10:00','注塑成型','良品 +1,400双','2号机 / 周强'],['05-29 16:30','包装完工','良品 +1,200双','包装组 / 梁静']],
+        qc:[['OQC-250530-009','全检','已检 2,600双','不合格 0双','通过']],
+        inbound:[['IN-250530-011','完工入库','2,600双','已入库','单位成本 ¥43.00']],
+        shipping:[['待生成','尚未生成发货单','可发 2,600双','待发货']],
+        finance:{receivable:'¥156,000', paid:'¥0', pending:'¥156,000', balance:'未使用余额', status:'预计应收'},
+        cost:{material:'¥76,900', labor:'¥18,200', overhead:'¥12,600', loss:'¥0', unit:'¥43.00/双'}
+      },
+      {
+        id:'ORD-250520-016', customer:'广州十三行张总', product:'R90 经典雨鞋', status:'已发货 / 待签收', statusClass:'tag-orange', risk:'运输中', riskClass:'tag-blue', amount:224000, cost:169200, margin:54800, marginRate:'24.5%',
+        progress:['审核','计划生成','生产','入库','发货'], active:'发货',
+        summary:'订单 3,500 双已出库发运，剩余 1,500 双待补发。',
+        order:{date:'2025-05-20', delivery:'2025-05-30', qty:'5,000 双', payment:'预付 50%，签收后结尾款', owner:'业务一部 / 陈丽'},
+        audit:[['销售主管','已通过','2025-05-20 10:20','通过'],['财务复核','已通过','2025-05-20 10:55','预付款已确认']],
+        plan:{evalNo:'PLAN-250520-016', stock:'占用库存 1,500 双', produce:'生产 3,500 双', workOrder:'WO-250520-016', planStatus:'已完成'},
+        mrp:[['橡胶大料','大料','需求 1.2吨','库存充足','已领料'],['鞋扣','配饰','需求 5,000个','库存充足','已领料']],
+        purchase:[['无','无新增采购','-','-'],['MI-250521-002','生产领料','已完成','已发料']],
+        report:[['05-22 17:30','高温发泡','良品 +3,500双','2号机 / 黄伟']],
+        qc:[['OQC-250523-004','抽检','已检 160双','不合格 2双','已返工通过']],
+        inbound:[['IN-250523-006','生产入库','3,500双','已入库','单位成本 ¥48.34']],
+        shipping:[['SHIP-250524-002','安能物流','本次发货 3,500双','运输中'],['待补发','剩余 1,500双','待生成发货单','待处理']],
+        finance:{receivable:'¥224,000', paid:'¥112,000', pending:'¥112,000', balance:'未使用余额', status:'正式应收 / 部分收款'},
+        cost:{material:'¥101,400', labor:'¥31,800', overhead:'¥22,600', loss:'¥1,500', unit:'¥48.34/双'}
+      },
+      {
+        id:'ORD-250515-020', customer:'佛山连锁门店', product:'E677 凉拖组合款', status:'已完成', statusClass:'tag-green', risk:'无异常', riskClass:'tag-blue', amount:98000, cost:70100, margin:27900, marginRate:'28.5%',
+        progress:['审核','计划生成','生产','入库','发货','签收','收款'], active:'收款',
+        summary:'订单已签收，客户已完成尾款结清，成本毛利已归档。',
+        order:{date:'2025-05-15', delivery:'2025-05-25', qty:'1,800 双', payment:'签收后结清', owner:'业务三部 / 李霞'},
+        audit:[['销售主管','已通过','2025-05-15 09:20','通过']],
+        plan:{evalNo:'PLAN-250515-020', stock:'占用库存 800 双', produce:'生产 1,000 双', workOrder:'WO-250515-020', planStatus:'已归档'},
+        mrp:[['PVC大料','大料','需求 360kg','库存充足','已领料'],['包装袋','配饰','需求 1,800个','库存充足','已领料']],
+        purchase:[['无','无新增采购','-','-']],
+        report:[['05-18 15:00','成型包装','良品 +1,000双','1号线 / 生产组']],
+        qc:[['OQC-250519-003','抽检','已检 80双','不合格 0双','通过']],
+        inbound:[['IN-250519-004','完工入库','1,000双','已入库','单位成本 ¥38.94']],
+        shipping:[['SHIP-250520-001','顺丰重货','1,800双','已签收']],
+        finance:{receivable:'¥98,000', paid:'¥98,000', pending:'¥0', balance:'余额抵扣 ¥2,000', status:'已收款'},
+        cost:{material:'¥43,500', labor:'¥13,200', overhead:'¥9,100', loss:'¥0', unit:'¥38.94/双'}
+      },
+      {
+        id:'ORD-250512-022', customer:'上海义乌小商品城', product:'R90 雨鞋', status:'退货处理中', statusClass:'tag-red', risk:'退货冻结', riskClass:'tag-red', amount:186000, cost:139500, margin:46500, marginRate:'25.0%',
+        progress:['审核','生产','发货','退货'], active:'退货',
+        summary:'客户申请部分退货，退货退款方案待审核；剩余待发数量已冻结。',
+        order:{date:'2025-05-12', delivery:'2025-05-28', qty:'3,000 双', payment:'预付 30%，余款签收后结', owner:'业务一部 / 陈丽'},
+        audit:[['销售主管','已通过','2025-05-12 14:30','通过'],['退货审核','待审核','2025-06-01 10:15','协商退款方案待确认']],
+        plan:{evalNo:'PLAN-250512-022', stock:'未占用库存', produce:'生产 3,000 双', workOrder:'WO-250512-022', planStatus:'已发货后退货'},
+        mrp:[['橡胶大料','大料','需求 1.1吨','已使用','已领料'],['鞋扣','配饰','需求 3,000个','已使用','已领料']],
+        purchase:[['无','无新增采购','-','-']],
+        report:[['05-16 18:00','完工报工','良品 +3,000双','2号机 / 黄伟']],
+        qc:[['OQC-250517-006','全检','已检 3,000双','不合格 15双','已处置']],
+        inbound:[['IN-250518-006','完工入库','2,985双','已入库','单位成本 ¥46.73']],
+        shipping:[['SHIP-250519-004','安能物流','已发 2,000双','客户申请退货'],['冻结','剩余 1,000双','暂停发货','退货处理中']],
+        finance:{receivable:'¥186,000', paid:'¥55,800', pending:'¥130,200', balance:'退款方式待审核', status:'退货冲账待处理'},
+        cost:{material:'¥88,600', labor:'¥24,900', overhead:'¥18,500', loss:'¥7,500', unit:'¥46.73/双'}
+      }
+    ];
+
+    function money(n){ return '¥' + n.toLocaleString('zh-CN'); }
+    function qtyNumber(text){ const m=String(text||'').replace(/,/g,'').match(/(\d+)/); return m?Number(m[1]):0; }
+    function packByProduct(product){ const p=String(product||''); if(p.includes('R90')||p.includes('雨鞋')||p.includes('雨靴')) return 40; if(p.includes('S12')) return 50; return 60; }
+    function qtyBoxText(text, pack=60){ const q=qtyNumber(text); if(!q)return ''; const b=Math.floor(q/pack), l=q%pack; return b+'箱'+(l?' + '+l+'双':''); }
+    function qtyBoxTextByProduct(text, product){ return qtyBoxText(text, packByProduct(product)); }
+    function boxLine(text, pack=60){ const t=qtyBoxText(text, pack); return t ? '<div class="box-mini">箱数：<b>'+t+'</b>（'+pack+'双/箱）</div>' : ''; }
+    function skuTemplates(product){
+      const p = String(product || '');
+      if(p.includes('R90') || p.includes('雨鞋') || p.includes('雨靴')){
+        return [
+          {model:'R90 经典雨鞋', color:'黑色', size:'42码', sku:'R90-BK-42', boxCode:'R90-BK-42', pack:40, ratio:.40},
+          {model:'R90 经典雨鞋', color:'黑色', size:'43码', sku:'R90-BK-43', boxCode:'R90-BK-43', pack:40, ratio:.32},
+          {model:'R90 经典雨鞋', color:'军绿色', size:'42码', sku:'R90-GR-42', boxCode:'R90-GR-42', pack:40, ratio:.28}
+        ];
+      }
+      if(p.includes('粉色')){
+        return [
+          {model:'E677 凉拖', color:'粉色', size:'38码', sku:'E677-PK-38', boxCode:'E677-PK-38', pack:60, ratio:.30},
+          {model:'E677 凉拖', color:'粉色', size:'39码', sku:'E677-PK-39', boxCode:'E677-PK-39', pack:60, ratio:.35},
+          {model:'E677 凉拖', color:'粉色', size:'40码', sku:'E677-PK-40', boxCode:'E677-PK-40', pack:60, ratio:.35}
+        ];
+      }
+      if(p.includes('组合')){
+        return [
+          {model:'E677 凉拖', color:'蓝色', size:'40码', sku:'E677-BL-40', boxCode:'E677-BL-40', pack:60, ratio:.34},
+          {model:'E677 凉拖', color:'米白色', size:'41码', sku:'E677-WH-41', boxCode:'E677-WH-41', pack:60, ratio:.33},
+          {model:'E677 凉拖', color:'黑色', size:'42码', sku:'E677-BK-42', boxCode:'E677-BK-42', pack:60, ratio:.33}
+        ];
+      }
+      return [
+        {model:'E677 夏季防滑凉拖', color:'蓝色', size:'40码', sku:'E677-BL-40', boxCode:'E677-BL-40', pack:60, ratio:.30},
+        {model:'E677 夏季防滑凉拖', color:'蓝色', size:'41码', sku:'E677-BL-41', boxCode:'E677-BL-41', pack:60, ratio:.35},
+        {model:'E677 夏季防滑凉拖', color:'黑色', size:'42码', sku:'E677-BK-42', boxCode:'E677-BK-42', pack:60, ratio:.35}
+      ];
+    }
+    function skuRowsByQty(product, qtyText){
+      const total = qtyNumber(qtyText);
+      const templates = skuTemplates(product);
+      if(!total) return [];
+      let used = 0;
+      return templates.map((t, i) => {
+        let qty = i === templates.length - 1 ? (total - used) : Math.round(total * t.ratio / 10) * 10;
+        if(qty < 0) qty = 0;
+        used += qty;
+        const boxes = Math.floor(qty / t.pack);
+        const loose = qty % t.pack;
+        return {...t, qty, boxes, loose, boxText: boxes + '箱' + (loose ? ' + ' + loose + '双' : '')};
+      }).filter(r => r.qty > 0);
+    }
+    function skuBoxSummary(product, qtyText){
+      const rows = skuRowsByQty(product, qtyText);
+      if(!rows.length) return '';
+      const totalQty = rows.reduce((s,r)=>s+r.qty,0);
+      const totalBoxes = rows.reduce((s,r)=>s+r.boxes,0);
+      const totalLoose = rows.reduce((s,r)=>s+r.loose,0);
+      return totalQty.toLocaleString('zh-CN') + '双 / ' + totalBoxes + '箱' + (totalLoose ? ' + ' + totalLoose + '双零散' : '');
+    }
+    function skuBoxMiniHtml(product, qtyText){
+      const rows = skuRowsByQty(product, qtyText);
+      if(!rows.length) return '';
+      const top = rows.slice(0,2).map(r=>`${r.color}${r.size}：${r.boxText}`).join('；');
+      const more = rows.length > 2 ? `；等 ${rows.length} 个SKU` : '';
+      return `<div class="box-mini">箱数：<b>${skuBoxSummary(product, qtyText)}</b></div><div class="mini">${top}${more}</div>`;
+    }
+    function skuBoxTableHtml(product, qtyText){
+      const rows = skuRowsByQty(product, qtyText).map(r=>[
+        r.model,
+        r.color,
+        r.size,
+        `<span class="sku-box-code">${r.sku}</span>`,
+        r.boxCode,
+        r.pack + '双/箱',
+        r.qty.toLocaleString('zh-CN') + '双',
+        `<b>${r.boxText}</b>`
+      ]);
+      return rowsToHtml(rows, ['型号','颜色','尺码','SKU','箱码','每箱数量','数量','箱数']);
+    }
+
+    function renderRows(){
+      const tbody = document.getElementById('orderRows');
+      tbody.innerHTML = orders.map((o,idx)=>`
+        <tr>
+          <td>
+            <div class="order-no" onclick="openDetail(${idx})">${o.id}</div>
+            <div class="sub">${o.customer}</div>
+            <div class="mini">${o.product}</div>${skuBoxMiniHtml(o.product,o.order.qty)}
+          </td>
+          <td><span class="status-tag ${o.statusClass}">${o.status}</span></td>
+          <td>
+            <div class="chain-mini">${buildMiniChain(o)}</div>
+            <div class="mini" style="margin-top:7px;">${o.summary}</div>
+          </td>
+          <td>
+            <div class="sub"><b>生产：</b>${o.report?.[0]?.[2] || '待处理'}</div>
+            <div class="sub"><b>发货：</b>${o.shipping?.[0]?.[2] || '待生成'}</div>
+            <div class="sub"><b>应收：</b>${o.finance.status}</div>
+          </td>
+          <td class="num-right">
+            <div><b>${money(o.amount)}</b></div>
+            <div class="mini">毛利 ${money(o.margin)} / ${o.marginRate}</div>
+          </td>
+          <td><span class="status-tag ${o.riskClass}">${o.risk}</span></td>
+          <td><span class="action-link" onclick="openDetail(${idx})">详情</span></td>
+        </tr>
+      `).join('');
+    }
+    function buildMiniChain(o){
+      const sequence = ['审核','算料','计划','领料','生产','质检','入库','发货','签收','收款'];
+      const activeIndex = sequence.indexOf(o.active);
+      return sequence.map((s,i)=>{
+        let cls = i < activeIndex ? 'done' : (i === activeIndex ? 'active' : '');
+        if(o.status.includes('退货') && s==='发货') cls='error';
+        if(o.risk.includes('异常') && s==='质检') cls='error';
+        return `<span class="chain-node ${cls}">${s}</span>`;
+      }).join('');
+    }
+    function rowsToHtml(rows, heads){
+      return `<table class="small-table"><thead><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    }
+    function openDetail(idx){
+      const o = orders[idx];
+      document.getElementById('drawerTitle').innerHTML = `${o.id}｜${o.customer}｜全链路详情`;
+      document.getElementById('drawerBody').innerHTML = detailHtml(o);
+      document.getElementById('detailDrawer').classList.add('show');
+    }
+    function detailHtml(o){
+      return `
+        <div class="overview-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;">
+            <div>
+              <div style="font-size:20px;font-weight:bold;color:var(--primary);">${o.id}</div>
+              <div style="margin-top:6px;color:#666;">${o.customer}｜${o.product}｜订单数量：${o.order.qty}</div>${skuBoxMiniHtml(o.product,o.order.qty)}
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;"><span class="status-tag ${o.statusClass}">${o.status}</span><span class="status-tag ${o.riskClass}">${o.risk}</span></div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item"><div class="summary-label">订单金额</div><div class="summary-value">${money(o.amount)}</div></div>
+            <div class="summary-item"><div class="summary-label">应收/已收</div><div class="summary-value">${o.finance.receivable} / ${o.finance.paid}</div></div>
+            <div class="summary-item"><div class="summary-label">成本 / 单位成本</div><div class="summary-value">${money(o.cost)} / ${o.cost.unit}</div></div>
+            <div class="summary-item"><div class="summary-label">毛利</div><div class="summary-value" style="color:var(--success);">${money(o.margin)}｜${o.marginRate}</div></div>
+          </div>
+          <div class="progress-line">${buildProgressLine(o)}</div>
+        </div>
+        <div class="section-grid">
+          <div class="section-card wide">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-file-lines" style="color:var(--primary);"></i>订单信息</div></div>
+            <div class="section-body"><div class="kv-grid">
+              <div class="kv-label">客户</div><div class="kv-value">${o.customer}</div><div class="kv-label">产品</div><div class="kv-value">${o.product}</div>
+              <div class="kv-label">下单日期</div><div class="kv-value">${o.order.date}</div><div class="kv-label">交付日期</div><div class="kv-value">${o.order.delivery}</div>
+              <div class="kv-label">订单数量</div><div class="kv-value">${o.order.qty}</div><div class="kv-label">SKU箱数汇总</div><div class="kv-value"><b>${skuBoxSummary(o.product,o.order.qty)}</b></div><div class="kv-label">结算方式</div><div class="kv-value">${o.order.payment}</div>
+              <div class="kv-label">业务负责人</div><div class="kv-value">${o.order.owner}</div><div class="kv-label">当前状态</div><div class="kv-value"><span class="status-tag ${o.statusClass}">${o.status}</span></div>
+            </div></div>
+          </div>
+          <div class="section-card wide">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-box-open" style="color:var(--warning);"></i>SKU 箱数明细</div><span class="status-tag tag-gray">按型号 / 颜色 / 尺码分别计算</span></div>
+            <div class="section-body">${skuBoxTableHtml(o.product,o.order.qty)}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-user-check" style="color:var(--success);"></i>审核记录</div></div>
+            <div class="section-body">${rowsToHtml(o.audit,['节点','状态','时间','意见'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-calendar-check" style="color:var(--primary);"></i>生产计划 / 工单</div></div>
+            <div class="section-body"><div class="kv-grid" style="grid-template-columns:110px 1fr;">
+              <div class="kv-label">计划单</div><div class="kv-value">${o.plan.evalNo}</div>
+              <div class="kv-label">库存处理</div><div class="kv-value">${o.plan.stock}</div>
+              <div class="kv-label">计划生产</div><div class="kv-value">${o.plan.produce}</div>
+              <div class="kv-label">工单号</div><div class="kv-value">${o.plan.workOrder}</div>
+              <div class="kv-label">计划状态</div><div class="kv-value">${o.plan.planStatus}</div>
+            </div></div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-boxes-stacked" style="color:var(--warning);"></i>算料缺料情况</div></div>
+            <div class="section-body">${rowsToHtml(o.mrp,['物料','分类','需求','库存/缺口','处理'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-cart-shopping" style="color:var(--purple);"></i>采购 / 领料进度</div></div>
+            <div class="section-body">${rowsToHtml(o.purchase,['单据号','内容','状态','进度'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-industry" style="color:var(--primary);"></i>生产报工</div></div>
+            <div class="section-body">${rowsToHtml(o.report,['时间','工序','报工数量','人员/机台'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-clipboard-check" style="color:var(--success);"></i>质检结果</div></div>
+            <div class="section-body">${rowsToHtml(o.qc,['质检单','方式','检验数量','不合格','处理结果'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-warehouse" style="color:var(--primary);"></i>入库记录</div></div>
+            <div class="section-body">${rowsToHtml(o.inbound.map(r=>[r[0],r[1],r[2]+'<br>'+skuBoxMiniHtml(o.product,r[2]),r[3],r[4]]),['入库单','类型','数量 / 箱数','状态','成本状态'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-truck" style="color:var(--warning);"></i>发货 / 签收</div></div>
+            <div class="section-body">${rowsToHtml(o.shipping.map(r=>[r[0],r[1],r[2]+'<br>'+skuBoxMiniHtml(o.product,r[2]),r[3]]),['发运单','方式/承运','数量 / 箱数','状态'])}</div>
+          </div>
+          <div class="section-card">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-money-check-dollar" style="color:var(--success);"></i>应收 / 收款</div></div>
+            <div class="section-body"><div class="kv-grid" style="grid-template-columns:120px 1fr;">
+              <div class="kv-label">应收金额</div><div class="kv-value">${o.finance.receivable}</div>
+              <div class="kv-label">已收金额</div><div class="kv-value">${o.finance.paid}</div>
+              <div class="kv-label">待收金额</div><div class="kv-value">${o.finance.pending}</div>
+              <div class="kv-label">余额/退款</div><div class="kv-value">${o.finance.balance}</div>
+              <div class="kv-label">应收阶段</div><div class="kv-value">${o.finance.status}</div>
+            </div></div>
+          </div>
+          <div class="section-card wide">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-chart-line" style="color:var(--danger);"></i>成本毛利</div><span class="status-tag tag-gray">成本来源：实际领料 + 报工工时 + 质检损耗 + 入库数量</span></div>
+            <div class="section-body">
+              <div class="cost-card-grid">
+                <div class="cost-card"><div class="cost-label">材料成本</div><div class="cost-value">${o.cost.material}</div></div>
+                <div class="cost-card"><div class="cost-label">人工成本</div><div class="cost-value">${o.cost.labor}</div></div>
+                <div class="cost-card"><div class="cost-label">制造费用</div><div class="cost-value">${o.cost.overhead}</div></div>
+                <div class="cost-card"><div class="cost-label">异常损耗</div><div class="cost-value" style="color:var(--danger);">${o.cost.loss}</div></div>
+                <div class="cost-card"><div class="cost-label">销售毛利</div><div class="cost-value" style="color:var(--success);">${money(o.margin)}</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="section-card wide">
+            <div class="section-header"><div class="section-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i>链路日志</div></div>
+            <div class="section-body"><div class="timeline">${buildTimeline(o)}</div></div>
+          </div>
+        </div>
+      `;
+    }
+    function buildProgressLine(o){
+      const seq = ['订单','审核','算料','计划','领料','生产','质检','入库','发货','签收','应收','收款','归档'];
+      const map = {审核:'审核',算料:'算料',计划生成:'计划',计划:'计划',领料:'领料',生产:'生产',质检:'质检',入库:'入库',发货:'发货',签收:'签收',收款:'收款'};
+      const activeName = map[o.active] || '订单';
+      const activeIdx = seq.indexOf(activeName);
+      return seq.map((s,i)=>{
+        const cls = i<activeIdx?'done':(i===activeIdx?'active':'');
+        return `<div class="step ${cls}"><div class="step-dot">${i+1}</div><div class="step-text">${s}</div></div>${i<seq.length-1?`<div class="step-line ${i<activeIdx?'done':''}"></div>`:''}`;
+      }).join('');
+    }
+    function buildTimeline(o){
+      const items = [
+        ['done','订单创建',`${o.order.date} 09:30`,`${o.order.owner} 创建订单，客户为 ${o.customer}，产品为 ${o.product}。`],
+        ['done','订单审核',o.audit[o.audit.length-1][2],`审核记录已完成/进行中，当前审核状态：${o.audit[o.audit.length-1][1]}。`],
+        ['done','算料与物料核算', o.plan.evalNo, `算料已完成，大料、配饰、包装需求已形成。`],
+        ['done','生产计划与物料安排',o.purchase[0][0],`生产计划确认后，领料任务和采购需求按物料状态下推。`],
+        [o.status.includes('生产')?'active':'done','生产报工',o.report[0]?.[0] || '-',o.report[0]?.[2] || '暂无报工。'],
+        [o.risk.includes('异常')?'error':'done','质检入库',o.qc[0]?.[0] || '-',`${o.qc[0]?.[4] || '待质检'}；入库记录：${o.inbound[0]?.[2] || '暂无'}`],
+        [o.status.includes('退货')?'error':(o.status.includes('发货')?'active':'done'),'发货签收',o.shipping[0]?.[0] || '-',`${o.shipping[0]?.[2] || '待发货'}，状态：${o.shipping[0]?.[3] || '待处理'}。`],
+        [o.finance.status.includes('退货')?'warn':'done','应收/收款',o.finance.status,`应收 ${o.finance.receivable}，已收 ${o.finance.paid}，待收 ${o.finance.pending}。`]
+      ];
+      return items.map(i=>`<div class="tl-item ${i[0]}"><div class="tl-title"><span>${i[1]}</span><span class="tl-time">${i[2]}</span></div><div class="tl-desc">${i[3]}</div></div>`).join('');
+    }
+    function closeDetail(){ document.getElementById('detailDrawer').classList.remove('show'); }
+    function maskClose(e){ if(e.target.id === 'detailDrawer') closeDetail(); }
+    renderRows();
+  </script>
+</body>
+</html>

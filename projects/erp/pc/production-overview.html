@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宏通塑料鞋业 ERP - 生产一览表</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-dark: #001529;
+            --sidebar-sub: #000c17;
+            --primary: #1890ff;
+            --primary-hover: #40a9ff;
+            --bg-body: #f0f2f5;
+            --border: #e8e8e8;
+            --text-main: #333333;
+            --danger: #f5222d;
+            --success: #52c41a;
+            --warning: #faad14;
+            --purple: #722ed1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; font-size: 13px; }
+        input, select, button, textarea { outline: none; font-family: inherit; }
+        .primary-sidebar { width: 85px; background-color: var(--sidebar-dark); display: flex; flex-direction: column; align-items: center; padding-top: 15px; z-index: 100; flex-shrink: 0; border-right: 1px solid #000; }
+        .ps-logo { width: 40px; height: 40px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>') center/contain no-repeat; margin-bottom: 20px; }
+        .ps-item { width: 100%; padding: 15px 0; display: flex; flex-direction: column; align-items: center; color: #a6adb4; cursor: pointer; transition: 0.2s; font-size: 12px; gap: 6px; }
+        .ps-item i { font-size: 20px; }
+        .ps-item:hover { color: #fff; }
+        .ps-item.active { background-color: var(--primary); color: #fff; }
+        .secondary-sidebar { width: 180px; background-color: var(--sidebar-sub); border-right: 1px solid #000; display: flex; flex-direction: column; flex-shrink: 0; z-index: 90; }
+        .ss-header { height: 60px; display: flex; align-items: center; padding-left: 20px; color: #fff; font-size: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tree-menu { padding: 10px 0; overflow-y: auto; flex: 1; }
+        .tree-node { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #a6adb4; transition: 0.2s; border-left: 3px solid transparent; }
+        .tree-node:hover { color: #fff; }
+        .tree-node.active { color: var(--primary); border-left-color: var(--primary); background: rgba(24,144,255,0.1); }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); }
+        .top-header { height: 60px; background-color: var(--sidebar-dark); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; color: #fff; font-style: italic; font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .top-tools { display: flex; align-items: center; gap: 20px; font-size: 16px; font-weight: normal; font-style: normal; }
+        .tabs-bar { height: 45px; background-color: #fafafa; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; padding: 0 15px; gap: 5px; z-index: 10; }
+        .tab-item { padding: 10px 20px; font-size: 13px; color: #666; display: flex; align-items: center; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab-item.active { background-color: #fff; color: var(--primary); border: 1px solid var(--border); border-bottom: none; border-radius: 4px 4px 0 0; position: relative; top: 1px; font-weight: bold; }
+        .page-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; margin: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 20px; }
+        .kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 18px; }
+        .kpi-card { padding: 18px 22px; border-radius: 8px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; min-height: 96px; border: 1px solid transparent; }
+        .kpi-card.blue { background: linear-gradient(135deg, #e6f7ff, #bae0ff); border-color: #91d5ff; }
+        .kpi-card.green { background: linear-gradient(135deg, #f6ffed, #d9f7be); border-color: #b7eb8f; }
+        .kpi-card.orange { background: linear-gradient(135deg, #fff7e6, #ffe7ba); border-color: #ffd591; }
+        .kpi-card.purple { background: linear-gradient(135deg, #f9f0ff, #efdbff); border-color: #d3adf7; }
+        .kpi-label { font-size: 13px; color: #555; margin-bottom: 8px; font-weight: bold; }
+        .kpi-val { font-size: 30px; font-weight: bold; color: #333; font-family: monospace; }
+        .kpi-icon { position: absolute; right: 18px; bottom: 8px; font-size: 54px; color: rgba(255,255,255,0.65); }
+        .filter-row { display: flex; gap: 12px; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
+        .input-box { padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; width: 210px; background: #fff; }
+        .input-box:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
+        .btn { padding: 8px 15px; border-radius: 4px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent; transition: 0.2s; }
+        .btn-primary { background-color: var(--primary); color: #fff; border-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
+        .btn-outline { background: #fff; border-color: #d9d9d9; color: #333; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+        .table-container { flex: 1; overflow: auto; border: 1px solid var(--border); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        th { background-color: #fafafa; padding: 13px 10px; color: #666; font-weight: bold; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+        td { padding: 14px 10px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; }
+        .main-row { transition: 0.2s; }
+        .main-row:hover td { background-color: #fcfcfc; }
+        .main-row.expanded td { background-color: #f0f7ff; border-bottom-color: transparent; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .expand-icon { display: inline-flex; justify-content: center; align-items: center; width: 22px; height: 22px; background: var(--primary); color: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .expand-icon:hover { background: var(--primary-hover); }
+        .main-row.expanded .expand-icon { background: #999; }
+        .order-link { color: var(--primary); font-weight: bold; font-size: 14px; cursor: pointer; }
+        .order-link:hover { text-decoration: underline; }
+        .muted { color: #999; font-size: 12px; }
+        .mini-badge { display: inline-block; margin-top: 4px; font-size: 11px; color: #999; background: #f2f2f2; padding: 2px 5px; border-radius: 2px; }
+        .flow-container { display: flex; align-items: center; justify-content: center; width: 100%; padding: 2px 6px; }
+        .flow-node { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 70px; cursor: pointer; }
+        .node-circle { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #d9d9d9; background: #fff; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; color: #999; z-index: 2; font-family: monospace; transition: 0.2s; }
+        .flow-node:hover .node-circle { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
+        .node-circle.done { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 3px rgba(24,144,255,0.1); }
+        .node-circle.active { border-color: var(--warning); background: var(--warning); color: #fff; box-shadow: 0 0 0 4px rgba(250,173,20,0.2); }
+        .node-circle.error { border-color: var(--danger); background: var(--danger); color: #fff; box-shadow: 0 0 0 4px rgba(245,34,45,0.2); }
+        .node-label { font-size: 12px; margin-top: 7px; color: #666; white-space: nowrap; }
+        .node-circle.active + .node-label { font-weight: bold; color: var(--warning); }
+        .node-circle.error + .node-label { font-weight: bold; color: var(--danger); }
+        .flow-line { flex: 1; height: 2px; background: #d9d9d9; position: relative; top: -12px; z-index: 1; min-width: 10px; }
+        .flow-line.done { background: var(--primary); }
+        .progress-box { width: 100%; max-width: 170px; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: #666; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; transition: width 0.5s ease; }
+        .tag { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 8px; border-radius: 4px; font-size: 12px; white-space: nowrap; }
+        .tag-green { background: #f6ffed; color: var(--success); border: 1px solid #b7eb8f; }
+        .tag-red { background: #fff1f0; color: var(--danger); border: 1px solid #ffa39e; }
+        .tag-blue { background: #e6f7ff; color: var(--primary); border: 1px solid #91d5ff; }
+        .tag-orange { background: #fff7e6; color: var(--warning); border: 1px solid #ffd591; }
+        .op-link { color: var(--primary); cursor: pointer; white-space: nowrap; }
+        .op-link:hover { text-decoration: underline; }
+        .op-link.danger { color: var(--danger); font-weight: bold; }
+        .detail-row { display: none; background: #f8faff; box-shadow: inset 0 3px 6px -3px rgba(0,0,0,0.05); }
+        .detail-row.show { display: table-row; }
+        .detail-wrapper { padding: 15px 20px 20px 48px; }
+        .detail-title { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .nested-table { width: 100%; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; overflow: hidden; }
+        .nested-table th { background: #fafafa; padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #eee; color: #666; position: static; }
+        .nested-table td { padding: 11px 12px; font-size: 12px; border-bottom: 1px dashed #eee; color: #555; }
+        .step-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; border: 1px solid transparent; }
+        .step-tag.blue { background: #e6f7ff; color: var(--primary); border-color: #91d5ff; }
+        .step-tag.green { background: #f6ffed; color: var(--success); border-color: #b7eb8f; }
+        .step-tag.red { background: #fff1f0; color: var(--danger); border-color: #ffa39e; }
+        .val-plus { color: var(--success); font-weight: bold; font-family: monospace; font-size: 14px; }
+        .empty-state { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 42px; color: #999; gap: 8px; border-top: 1px solid #f0f0f0; }
+        .empty-state i { font-size: 34px; color: #d9d9d9; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { width: 680px; max-height: 86vh; background: #fff; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.16); display: flex; flex-direction: column; animation: zoomIn 0.18s ease; }
+        @keyframes zoomIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { padding: 15px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px; }
+        .modal-close { cursor: pointer; color: #999; font-size: 18px; transition: 0.2s; }
+        .modal-close:hover { color: var(--danger); transform: rotate(90deg); }
+        .modal-body { padding: 22px; overflow-y: auto; }
+        .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); background: #fafafa; border-radius: 0 0 8px 8px; display: flex; justify-content: flex-end; gap: 10px; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+        .info-card { border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; background: #fafafa; }
+        .info-label { font-size: 12px; color: #888; margin-bottom: 5px; }
+        .info-value { font-size: 14px; color: #333; font-weight: bold; }
+        .diagnose-box { border-left: 4px solid var(--warning); background: #fffbe6; padding: 12px 14px; line-height: 1.7; color: #755b00; margin-bottom: 14px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 7px; }
+        .form-group.full { grid-column: span 2; }
+        .form-label { color: #333; font-weight: bold; font-size: 13px; }
+        .form-input { padding: 9px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; }
+        textarea.form-input { min-height: 78px; resize: vertical; }
+
+        .check-section { margin-top: 14px; }
+        .check-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: bold; color: #333; }
+        .check-table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        .check-table th { position: static; background: #fafafa; padding: 10px 12px; font-size: 12px; color: #666; border-bottom: 1px solid #eee; }
+        .check-table td { padding: 11px 12px; font-size: 12px; color: #333; border-bottom: 1px dashed #eee; vertical-align: middle; }
+        .scope-text { color: #666; line-height: 1.5; }
+        .result-pill { display:inline-flex; align-items:center; justify-content:center; padding:2px 8px; border-radius:12px; font-size:11px; white-space:nowrap; }
+        .result-pill.pending { background:#fff7e6; color:var(--warning); border:1px solid #ffd591; }
+        .result-pill.done { background:#f6ffed; color:var(--success); border:1px solid #b7eb8f; }
+        .result-pill.error { background:#fff1f0; color:var(--danger); border:1px solid #ffa39e; }
+        .mini-action { color: var(--primary); cursor: pointer; white-space: nowrap; }
+        .mini-action:hover { text-decoration: underline; }
+        .add-check-panel { background:#fafafa; border:1px dashed #d9d9d9; padding:12px; border-radius:6px; margin-top:12px; display:grid; grid-template-columns: 1fr 1.4fr 120px; gap:10px; align-items:center; }
+        .add-check-panel .form-input { height: 34px; padding: 7px 10px; }
+        .toast { position: fixed; right: 24px; top: 78px; background: #fff; color: #333; border: 1px solid #b7eb8f; border-left: 4px solid var(--success); box-shadow: 0 6px 18px rgba(0,0,0,0.12); padding: 12px 16px; border-radius: 4px; display: none; z-index: 1500; }
+        .toast.error { border-color: #ffa39e; border-left-color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div class="primary-sidebar">
+        <div class="ps-logo"></div>
+        <div class="ps-item"><i class="fa-solid fa-house"></i><span>首页</span></div>
+        <div class="ps-item"><i class="fa-solid fa-database"></i><span>主数据</span></div>
+        <div class="ps-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>订单管理</span></div>
+        <div class="ps-item active"><i class="fa-solid fa-industry"></i><span>生产管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-warehouse"></i><span>仓库管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-cart-shopping"></i><span>采购管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-truck"></i><span>物流管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-money-check-dollar"></i><span>财务管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-chart-line"></i><span>报表统计</span></div>
+    </div>
+    <div class="secondary-sidebar">
+        <div class="ss-header"><i class="fa-solid fa-file-lines" style="margin-right:8px;"></i> 生产管理</div>
+        <div class="tree-menu">
+            <div class="tree-node">生产工单下发</div>
+            <div class="tree-node">算料与物料核算</div>
+            <div class="tree-node active"><i class="fa-solid fa-bars-progress"></i> 生产一览表</div>
+            <div class="tree-node">报工审核与修正</div>
+            <div class="tree-node">质量检验品控</div>
+            <div class="tree-node">生产综合报表</div>
+        </div>
+    </div>
+    <div class="main-wrapper">
+        <div class="top-header">
+            <div>宏通塑料鞋业ERP制造执行系统</div>
+            <div class="top-tools">
+                <i class="fa-solid fa-expand"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <i class="fa-regular fa-bell"></i>
+                <div style="font-size:14px; margin-left:10px;"><i class="fa-solid fa-user-circle"></i> 生产总监</div>
+            </div>
+        </div>
+        <div class="tabs-bar">
+            <div class="tab-item">生产管理</div>
+            <div class="tab-item active"><span style="color:var(--primary);">生产一览表 <i class="fa-solid fa-xmark"></i></span></div>
+        </div>
+        <div class="page-content">
+            <div class="kpi-row">
+                <div class="kpi-card blue">
+                    <div class="kpi-label">今日车间总产量 (双)</div>
+                    <div class="kpi-val" id="kpi-today-output">0</div>
+                    <i class="fa-solid fa-box-open kpi-icon"></i>
+                </div>
+                <div class="kpi-card green">
+                    <div class="kpi-label">本月整体计划达成率</div>
+                    <div class="kpi-val" id="kpi-month-rate">0%</div>
+                    <i class="fa-solid fa-calendar-check kpi-icon"></i>
+                </div>
+                <div class="kpi-card orange">
+                    <div class="kpi-label">生产中工单</div>
+                    <div class="kpi-val" id="kpi-running-count">0</div>
+                    <i class="fa-solid fa-gears kpi-icon"></i>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-label">异常阻塞工单</div>
+                    <div class="kpi-val" id="kpi-blocked-count" style="color:var(--danger);">0</div>
+                    <i class="fa-solid fa-battery-quarter kpi-icon"></i>
+                </div>
+            </div>
+            <div class="filter-row">
+                <input type="text" class="input-box" id="keyword" placeholder="工单号 / 鞋款 / 客户">
+                <select class="input-box" id="status-filter" style="width: 150px;">
+                    <option value="all">全部状态</option>
+                    <option value="running">生产中</option>
+                    <option value="blocked">异常阻塞</option>
+                    <option value="done">已完工</option>
+                </select>
+                <select class="input-box" id="process-filter" style="width: 160px;">
+                    <option value="all">全部工序</option>
+                    <option value="原料混拌">原料混拌</option>
+                    <option value="注塑成型">注塑成型</option>
+                    <option value="修边包装">修边包装</option>
+                    <option value="OQC抽检">OQC抽检</option>
+                    <option value="成品入库">成品入库</option>
+                </select>
+                <button class="btn btn-primary" onclick="applyFilters()"><i class="fa-solid fa-magnifying-glass"></i> 查询</button>
+                <button class="btn btn-outline" onclick="resetFilters()"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+                <button class="btn btn-outline" style="margin-left:auto;" onclick="refreshPageData()"><i class="fa-solid fa-rotate"></i> 刷新</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <colgroup>
+                        <col style="width:55px">
+                        <col style="width:130px">
+                        <col style="width:210px">
+                        <col style="width:420px">
+                        <col style="width:185px">
+                        <col style="width:130px">
+                        <col style="width:120px">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="text-center">展开</th>
+                            <th>生产工单号</th>
+                            <th>生产目标物料</th>
+                            <th class="text-center">当前工艺流转</th>
+                            <th>整体完工进度</th>
+                            <th>成本归集</th>
+                            <th class="text-center">状态</th>
+                            <th class="text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-tbody"></tbody>
+                </table>
+                <div class="empty-state" id="empty-state">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <div>暂无符合条件的生产工单</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-detail" onclick="closeModal('modal-detail')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-file-lines" style="color:var(--primary);"></i> 工单详情</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-detail')"></i></div>
+            <div class="modal-body" id="detail-body"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-detail')">关闭</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-diagnose" onclick="closeModal('modal-diagnose')">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-stethoscope" style="color:var(--warning);"></i> 工单诊断</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-diagnose')"></i></div>
+            <div class="modal-body" id="diagnose-body"></div>
+            <div class="modal-footer" id="diagnose-footer"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-stage" onclick="closeModal('modal-stage')">
+        <div class="modal-box" onclick="event.stopPropagation()" style="width:560px;">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-circle-nodes" style="color:var(--primary);"></i> 工序详情</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-stage')"></i></div>
+            <div class="modal-body" id="stage-body"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-stage')">关闭</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-correction" onclick="closeModal('modal-correction')">
+        <div class="modal-box" onclick="event.stopPropagation()" style="width:560px;">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-pen-to-square" style="color:var(--primary);"></i> 报工纠错</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-correction')"></i></div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">工单号</label>
+                        <input class="form-input" id="correction-order" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">纠错类型</label>
+                        <select class="form-input" id="correction-type">
+                            <option>报工数量冲销</option>
+                            <option>工序节点更正</option>
+                            <option>异常状态关闭</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">调整数量</label>
+                        <input class="form-input" id="correction-qty" type="number" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">审批人</label>
+                        <select class="form-input">
+                            <option>生产主管</option>
+                            <option>品质主管</option>
+                            <option>厂长</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">调整原因</label>
+                        <textarea class="form-input" id="correction-reason" placeholder="请输入原因"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modal-correction')">取消</button>
+                <button class="btn btn-primary" onclick="submitCorrection()">提交</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal-overlay" id="modal-rework-assign" onclick="closeModal('modal-rework-assign')">
+        <div class="modal-box" onclick="event.stopPropagation()" style="width:620px;">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-screwdriver-wrench" style="color:var(--primary);"></i> 返工安排</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-rework-assign')"></i></div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label">返工工单</label><input class="form-input" id="rwOrder" readonly></div>
+                    <div class="form-group"><label class="form-label">来源质检单</label><input class="form-input" id="rwQc" readonly></div>
+                    <div class="form-group"><label class="form-label">责任人员/班组</label><input class="form-input" id="rwOwner" readonly></div>
+                    <div class="form-group"><label class="form-label">责任数量</label><input class="form-input" id="rwOwnerQty" readonly></div>
+                    <div class="form-group"><label class="form-label">返工执行人</label><select class="form-input" id="rwWorker"><option>李伟</option><option>张三</option><option>王敏</option><option>陈强</option><option>包装组</option></select></div>
+                    <div class="form-group"><label class="form-label">返工工序</label><select class="form-input" id="rwProcess"><option>返修补胶</option><option>修边打磨</option><option>包装返工</option><option>重新注塑</option></select></div>
+                    <div class="form-group"><label class="form-label">返工数量</label><input class="form-input" id="rwQty" type="number" value="0"></div>
+                    <div class="form-group"><label class="form-label">要求完成日期</label><input class="form-input" id="rwDue" type="date"></div>
+                    <div class="form-group full"><label class="form-label">返工要求</label><textarea class="form-input" id="rwRemark" placeholder="填写返工要求、复检注意事项"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-rework-assign')">取消</button><button class="btn btn-primary" onclick="saveReworkAssign()">保存安排</button></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const orders = [
+            {
+                id: 'WO-1106-01', type: '订单生产', source: 'ORD-231105-01', sourceOrderType: '普通销售订单', customer: '广州十三行贸易', product: 'E677 夏季防滑凉拖', qty: 5000, goodQty: 4200, todayOutput: 4200, progress: 84, status: 'running', statusText: '生产中', statusClass: 'tag-green', currentStage: '注塑成型', owner: '张三 / 李四', costStatus:'归集中', costText:'领料¥31,500 / 报工¥11,000',
+                checkpoints: [
+                    { name: '注塑成型停留时长', scope: '当前工序超过标准节拍时触发；检测报工间隔、模具状态、人员交接。', result: '待检测', status: 'pending' },
+                    { name: '良品率波动', scope: '对比本工单累计良品率与最近3次报工良品率，低于阈值时预警。', result: '待检测', status: 'pending' },
+                    { name: '下道工序准备', scope: '检测修边包装是否已具备接收条件，避免注塑完工后堆积。', result: '待检测', status: 'pending' }
+                ],
+                investigations: [],
+                stages: [
+                    { name: '原料混拌', percent: 100, status: 'done', lineDone: true, operator: '王班长', qty: 5000, time: '昨日 17:00' },
+                    { name: '注塑成型', percent: 84, status: 'active', lineDone: false, operator: '张三 / 李四', qty: 4200, time: '今日 14:15' },
+                    { name: '修边包装', percent: 0, status: 'todo', lineDone: false, operator: '待安排', qty: 0, time: '-' }
+                ],
+                logs: [
+                    { time: '今日 14:15', step: '02-注塑成型', tag: 'blue', person: '1号注塑线 (张三)', qty: '+1200 双', param: '温度: 165℃ | 压力: 90MPa' },
+                    { time: '今日 10:30', step: '02-注塑成型', tag: 'blue', person: '1号注塑线 (李四)', qty: '+3000 双', param: '温度: 166℃ | 压力: 90MPa' },
+                    { time: '昨日 17:00', step: '01-原料混拌', tag: 'green', person: '混料车间 (王班长)', qty: '+5000 双料', param: '蓝粉配比: 2.0%' }
+                ]
+            },
+            {
+                id: 'WO-1105-15', type: '订单生产', source: 'ORD-231028-15', sourceOrderType: '普通销售订单', customer: '义乌跨境批发商', product: 'R90 经典雨靴', qty: 2000, goodQty: 800, todayOutput: 800, progress: 40, status: 'blocked', statusText: '品质异常', statusClass: 'tag-red', currentStage: 'OQC抽检', owner: '品检部 / 赵刚', costStatus:'异常待确认', costText:'质检损耗¥5,600',
+                checkpoints: [
+                    { name: 'OQC抽检卡点', scope: '检测抽检记录、缺陷分类和处置状态。', result: '异常', status: 'error' }
+                ],
+                investigations: [
+                    { name: '质检记录复核', scope: '检测 QC-1105-01 抽检数量、缺陷分类、不良数量是否与工单一致。', result: '待排查', status: 'pending' },
+                    { name: '报工流水核对', scope: '检测高温发泡完成数量、报废数量、良品数量与当前进度是否一致。', result: '待排查', status: 'pending' },
+                    { name: '返工/报废处置', scope: '检测是否已生成返工单或报废单，以及是否需要补生产。', result: '待排查', status: 'pending' },
+                    { name: '库存与发货影响', scope: '检测该工单是否影响后续成品入库、发货单和应收节点。', result: '待排查', status: 'pending' }
+                ],
+                stages: [
+                    { name: '切割备料', percent: 100, status: 'done', lineDone: true, operator: '备料组', qty: 2000, time: '昨日 13:00' },
+                    { name: '高温发泡', percent: 100, status: 'done', lineDone: true, operator: '2号机 (李四)', qty: 800, time: '昨日 18:30' },
+                    { name: 'OQC抽检', percent: 0, status: 'error', lineDone: true, operator: '品检部 (赵刚)', qty: -50, time: '今日 09:12' }
+                ],
+                logs: [
+                    { time: '今日 09:12', step: '品质抽检', tag: 'red', person: '品检部 (赵刚)', qty: '-50 双', param: '发现气泡杂质，已冻结下发流程，申请补单。' },
+                    { time: '昨日 18:30', step: '02-高温发泡', tag: 'blue', person: '2号机 (李四)', qty: '+800 双', param: '正常下机入暂存区。' }
+                ]
+            },
+            {
+                id: 'WO-1108-03', type: '库存补货', source: 'ORD-231108-03', sourceOrderType: '库存补货计划', customer: '深圳跨境园区', product: 'E677 粉色凉拖', qty: 1000, goodQty: 1000, todayOutput: 0, progress: 100, status: 'done', statusText: '已完工', statusClass: 'tag-blue', currentStage: '成品入库', owner: '仓库 / 陈主管', costStatus:'待核算', costText:'入库后核算单位成本',
+                checkpoints: [
+                    { name: '入库确认', scope: '检测成品入库单、库位和库存台账是否已更新。', result: '已完成', status: 'done' },
+                    { name: '发货准备', scope: '检测是否已有对应发货需求，库存是否可用于物流拣货。', result: '待检测', status: 'pending' }
+                ],
+                investigations: [],
+                stages: [
+                    { name: '原料混拌', percent: 100, status: 'done', lineDone: true, operator: '混料车间', qty: 1000, time: '05-27 09:00' },
+                    { name: '注塑成型', percent: 100, status: 'done', lineDone: true, operator: '1号注塑线', qty: 1000, time: '05-27 15:00' },
+                    { name: '成品入库', percent: 100, status: 'done', lineDone: true, operator: '仓库', qty: 1000, time: '05-28 10:30' }
+                ],
+                logs: [
+                    { time: '05-28 10:30', step: '成品入库', tag: 'green', person: '仓库 (陈主管)', qty: '+1000 双', param: '库位：成品A区-A03' },
+                    { time: '05-27 15:00', step: '注塑成型', tag: 'blue', person: '1号注塑线 (张三)', qty: '+1000 双', param: '温度: 164℃ | 压力: 88MPa' }
+                ]
+            },
+            {
+                id: 'WO-250526-011', type: '订单生产', source: 'ORD-250526-011', sourceOrderType: '销售订单缺口生产', customer: '东莞批发客户', product: 'E677 粉色凉拖', qty: 2600, goodQty: 2600, todayOutput: 0, progress: 100, status: 'inbound', statusText: '已入库', statusClass: 'tag-green', currentStage: '成品入库', owner: '仓库主管', costStatus:'已核算', costText:'单位成本¥12.90/双',
+                checkpoints: [{ name: '入库记录核对', scope: '检测质检合格数量、入库数量、库位与订单数量是否一致。', result: '已完成', status: 'done' }], investigations: [],
+                stages: [
+                    { name: '注塑成型', percent: 100, status: 'done', lineDone: true, operator: '1号生产线', qty: 2600, time: '05-26 10:00' },
+                    { name: '修边包装', percent: 100, status: 'done', lineDone: true, operator: '包装组', qty: 2600, time: '05-26 15:00' },
+                    { name: '成品入库', percent: 100, status: 'done', lineDone: true, operator: '仓库主管', qty: 2600, time: '05-26 17:20' }
+                ],
+                logs: [{ time: '05-26 17:20', step: '成品入库', tag: 'green', person: '仓库主管', qty: '+2600 双', param: '库位：成品A区-A03' }]
+            },
+            {
+                id: 'WO-250520-016', type: '订单生产', source: 'ORD-250520-016', sourceOrderType: '销售订单缺口生产', customer: '广州十三行张总', product: 'R90 经典雨靴', qty: 3500, goodQty: 3500, todayOutput: 0, progress: 100, status: 'shipped', statusText: '已发货', statusClass: 'tag-green', currentStage: '已出库发运', owner: '物流文员', costStatus:'已核算', costText:'单位成本¥18.40/双',
+                checkpoints: [{ name: '出库发运核对', scope: '检测出库数量、发运批次、物流单号与订单状态。', result: '已完成', status: 'done' }], investigations: [],
+                stages: [
+                    { name: '生产完成', percent: 100, status: 'done', lineDone: true, operator: '车间', qty: 3500, time: '05-19' },
+                    { name: '成品入库', percent: 100, status: 'done', lineDone: true, operator: '仓库', qty: 3500, time: '05-20' },
+                    { name: '发货出库', percent: 100, status: 'done', lineDone: true, operator: '物流', qty: 3500, time: '05-20' }
+                ],
+                logs: [{ time:'05-20 16:00', step:'发货出库', tag:'green', person:'物流文员', qty:'+3500 双', param:'LOG-250520-01' }]
+            },
+            {
+                id: 'WO-250512-022', type: '售后冻结', source: 'ORD-250512-022', sourceOrderType: '售后退货冻结', customer: '上海义乌小商品城', product: 'R90 雨鞋', qty: 3000, goodQty: 3000, todayOutput: 0, progress: 100, status: 'returning', statusText: '退货处理中', statusClass: 'tag-red', currentStage: '退货冻结', owner: '售后专员',
+                checkpoints: [{ name: '退货影响核对', scope: '检测是否已冻结未发数量、暂停出库与财务退款状态。', result: '待检测', status: 'pending' }],
+                investigations: [{ name:'发货冻结范围', scope:'检测待发数量、已发数量和退货申请数量是否一致。', result:'待排查', status:'pending'}],
+                stages: [
+                    { name:'生产完成', percent:100, status:'done', lineDone:true, operator:'车间', qty:3000, time:'05-12' },
+                    { name:'发货', percent:80, status:'active', lineDone:false, operator:'物流', qty:2400, time:'05-13' },
+                    { name:'退货处理', percent:0, status:'error', lineDone:false, operator:'售后', qty:0, time:'06-01' }
+                ],
+                logs: [{ time:'06-01 09:00', step:'退货申请', tag:'red', person:'售后专员', qty:'冻结 320 双', param:'RET-250601-001' }]
+            }
+        ];
+
+        let activeCorrectionOrder = null;
+        let activeReworkOrder = null;
+
+        function formatNumber(num) {
+            return Number(num || 0).toLocaleString('zh-CN');
+        }
+
+        function stageCircle(stage) {
+            const label = stage.status === 'todo' ? '0%' : (stage.status === 'error' ? '异常' : `${stage.percent}%`);
+            return `<div class="flow-node" onclick="openStageDetail('${stage.name}', '${stage.operator}', '${stage.time}', '${stage.qty}', '${stage.status}')">
+                <div class="node-circle ${stage.status === 'todo' ? '' : stage.status}">${label}</div>
+                <div class="node-label">${stage.name}</div>
+            </div>`;
+        }
+
+        function renderFlow(order) {
+            return order.stages.map((stage, index) => {
+                const node = stageCircle(stage);
+                if (index === order.stages.length - 1) return node;
+                return node + `<div class="flow-line ${order.stages[index + 1].lineDone ? 'done' : ''}"></div>`;
+            }).join('');
+        }
+
+        function renderLogs(order) {
+            return order.logs.map(log => `<tr ${log.tag === 'red' ? 'style="background:#fff1f0;"' : ''}>
+                <td>${log.time}</td>
+                <td><span class="step-tag ${log.tag}">${log.step}</span></td>
+                <td>${log.person}</td>
+                <td class="val-plus" style="${log.tag === 'red' ? 'color:var(--danger);' : ''}">${log.qty}</td>
+                <td>${log.cost || (log.tag === 'red' ? '计入异常损耗' : '计入人工/制造费用')}</td>
+                <td>${log.param}</td>
+            </tr>`).join('');
+        }
+
+        function renderRows(list = orders) {
+            const tbody = document.getElementById('order-tbody');
+            tbody.innerHTML = list.map(order => `
+                <tr class="main-row" id="row-${order.id}">
+                    <td class="text-center"><div class="expand-icon" onclick="toggleDetail('${order.id}')"><i class="fa-solid fa-plus"></i></div></td>
+                    <td><span class="order-link" onclick="openOrderDetail('${order.id}')">${order.id}</span><br><span class="mini-badge">${order.type}</span><br><span class="muted">来源：${order.source}</span></td>
+                    <td><strong>${order.product}</strong><br><span class="muted">客户：${order.customer}</span><br><span class="muted">目标：${formatNumber(order.qty)} 双</span></td>
+                    <td><div class="flow-container">${renderFlow(order)}</div></td>
+                    <td>
+                        <div class="progress-box">
+                            <div class="progress-text"><span>已产良品: ${formatNumber(order.goodQty)}</span><span>${order.progress}%</span></div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${order.progress}%; background:${order.status === 'blocked' ? 'var(--warning)' : order.status === 'done' ? 'var(--success)' : 'var(--primary)'};"></div></div>
+                        </div>
+                    </td>
+                    <td><span class="tag ${order.costStatus === '已核算' ? 'tag-green' : order.costStatus === '异常待确认' ? 'tag-red' : 'tag-orange'}">${order.costStatus || '待归集'}</span><br><span class="muted">${order.costText || '-'}</span></td>
+                    <td class="text-center"><span class="tag ${order.statusClass}">${order.statusText}</span></td>
+                    <td class="text-center"><span class="op-link ${order.status === 'blocked' ? 'danger' : ''}" onclick="openDiagnose('${order.id}', '${order.status === 'blocked' ? 'investigation' : 'checkpoint'}')">${order.status === 'blocked' ? '一键排查' : '诊断卡点'}</span></td>
+                </tr>
+                <tr class="detail-row" id="detail-${order.id}">
+                    <td colspan="8" style="padding:0;">
+                        <div class="detail-wrapper">
+                            <div class="detail-title">
+                                <span>生产来源</span>
+                            </div>
+                            <div class="info-grid" style="margin-bottom:12px;">
+                                <div class="info-card"><div class="info-label">来源类型</div><div class="info-value">${order.type}</div></div>
+                                <div class="info-card"><div class="info-label">来源单据</div><div class="info-value">${order.source}</div></div>
+                                <div class="info-card"><div class="info-label">业务口径</div><div class="info-value">${order.sourceOrderType || '销售订单'}</div></div>
+                                <div class="info-card"><div class="info-label">客户</div><div class="info-value">${order.customer}</div></div>
+                            </div>
+                            <div class="detail-title">
+                                <span>报工流水</span>
+                                <button class="btn btn-outline" style="padding:4px 10px; font-size:12px;" onclick="openCorrection('${order.id}')">数据纠错/冲销</button>
+                            </div>
+                            <table class="nested-table">
+                                <colgroup>
+                                    <col style="width:14%"><col style="width:14%"><col style="width:22%"><col style="width:13%"><col style="width:13%"><col style="width:24%">
+                                </colgroup>
+                                <thead><tr><th>上报时间</th><th>工序节点</th><th>操作人员</th><th>本次流水</th><th>成本影响</th><th>备注/参数</th></tr></thead>
+                                <tbody>${renderLogs(order)}</tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('empty-state').style.display = list.length ? 'none' : 'flex';
+            updateKpis(list);
+        }
+
+        function updateKpis(list = orders) {
+            const todayOutput = list.reduce((sum, item) => sum + (item.todayOutput || 0), 0);
+            const totalQty = list.reduce((sum, item) => sum + item.qty, 0);
+            const totalGood = list.reduce((sum, item) => sum + item.goodQty, 0);
+            const rate = totalQty ? (totalGood / totalQty * 100).toFixed(1) : '0.0';
+            document.getElementById('kpi-today-output').textContent = formatNumber(todayOutput);
+            document.getElementById('kpi-month-rate').textContent = rate + '%';
+            document.getElementById('kpi-running-count').textContent = list.filter(item => item.status === 'running').length;
+            document.getElementById('kpi-blocked-count').textContent = list.filter(item => item.status === 'blocked').length;
+        }
+
+        function getFilteredOrders() {
+            const keyword = document.getElementById('keyword').value.trim().toLowerCase();
+            const status = document.getElementById('status-filter').value;
+            const process = document.getElementById('process-filter').value;
+            return orders.filter(order => {
+                const textMatch = !keyword || [order.id, order.product, order.customer, order.source].join(' ').toLowerCase().includes(keyword);
+                const statusMatch = status === 'all' || order.status === status;
+                const processMatch = process === 'all' || order.stages.some(stage => stage.name === process) || order.currentStage === process;
+                return textMatch && statusMatch && processMatch;
+            });
+        }
+
+        function applyFilters() {
+            renderRows(getFilteredOrders());
+        }
+
+        function resetFilters() {
+            document.getElementById('keyword').value = '';
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('process-filter').value = 'all';
+            renderRows(orders);
+        }
+
+        function refreshPageData() {
+            renderRows(getFilteredOrders());
+            showToast('生产一览数据已刷新');
+        }
+
+        function toggleDetail(orderId) {
+            const mainRow = document.getElementById('row-' + orderId);
+            const detailRow = document.getElementById('detail-' + orderId);
+            if (!mainRow || !detailRow) return;
+            const icon = mainRow.querySelector('.expand-icon i');
+            const isOpen = detailRow.classList.contains('show');
+            detailRow.classList.toggle('show', !isOpen);
+            mainRow.classList.toggle('expanded', !isOpen);
+            icon.classList.toggle('fa-plus', isOpen);
+            icon.classList.toggle('fa-minus', !isOpen);
+        }
+
+        function findOrder(id) {
+            return orders.find(item => item.id === id);
+        }
+
+        function openOrderDetail(id) {
+            const order = findOrder(id);
+            if (!order) return;
+            document.getElementById('detail-body').innerHTML = `
+                <div class="info-grid">
+                    <div class="info-card"><div class="info-label">生产工单</div><div class="info-value">${order.id}</div></div>
+                    <div class="info-card"><div class="info-label">来源订单</div><div class="info-value">${order.source}</div></div>
+                    <div class="info-card"><div class="info-label">客户</div><div class="info-value">${order.customer}</div></div>
+                    <div class="info-card"><div class="info-label">当前工序</div><div class="info-value">${order.currentStage}</div></div>
+                    <div class="info-card"><div class="info-label">计划数量</div><div class="info-value">${formatNumber(order.qty)} 双</div></div>
+                    <div class="info-card"><div class="info-label">已产良品</div><div class="info-value">${formatNumber(order.goodQty)} 双</div></div>
+                </div>
+                <table class="nested-table">
+                    <thead><tr><th>工序</th><th>进度</th><th>负责人/工位</th><th>最近更新时间</th></tr></thead>
+                    <tbody>${order.stages.map(stage => `<tr><td>${stage.name}</td><td>${stage.percent}%</td><td>${stage.operator}</td><td>${stage.time}</td></tr>`).join('')}</tbody>
+                </table>`;
+            openModal('modal-detail');
+        }
+
+        function resultPill(item) {
+            const cls = item.status === 'done' ? 'done' : item.status === 'error' ? 'error' : 'pending';
+            return `<span class="result-pill ${cls}">${item.result}</span>`;
+        }
+
+        function renderCheckTable(order, type) {
+            const items = type === 'investigation' ? (order.investigations || []) : (order.checkpoints || []);
+            const title = type === 'investigation' ? '待排查项目' : '待检测卡点项';
+            const addName = type === 'investigation' ? '新增排查项目' : '新增检测项';
+            const placeholderName = type === 'investigation' ? '例如：物流影响确认' : '例如：包装工序准备';
+            const placeholderScope = type === 'investigation' ? '填写需要排查的业务范围' : '填写检测范围和触发标准';
+            return `
+                <div class="check-section">
+                    <div class="check-title">
+                        <span>${title}</span>
+                        <span class="muted">共 ${items.length} 项</span>
+                    </div>
+                    <table class="check-table">
+                        <colgroup>
+                            <col style="width: 26%;">
+                            <col style="width: 44%;">
+                            <col style="width: 14%;">
+                            <col style="width: 16%;">
+                        </colgroup>
+                        <thead>
+                            <tr><th>项目</th><th>检测范围</th><th class="text-center">结果</th><th class="text-center">操作</th></tr>
+                        </thead>
+                        <tbody>
+                            ${items.map((item, index) => `<tr>
+                                <td><strong>${item.name}</strong></td>
+                                <td><div class="scope-text">${item.scope}</div></td>
+                                <td class="text-center">${resultPill(item)}</td>
+                                <td class="text-center">${item.status === 'done' ? '<span class="muted">已完成</span>' : `<span class="mini-action" onclick="markCheckItem('${order.id}', '${type}', ${index})">标记完成</span>`}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                    <div class="add-check-panel">
+                        <input class="form-input" id="new-check-name" placeholder="${placeholderName}">
+                        <input class="form-input" id="new-check-scope" placeholder="${placeholderScope}">
+                        <button class="btn btn-outline" onclick="addCheckItem('${order.id}', '${type}')"><i class="fa-solid fa-plus"></i> ${addName}</button>
+                    </div>
+                </div>`;
+        }
+
+        function openDiagnose(id, type) {
+            const order = findOrder(id);
+            if (!order) return;
+            const isInvestigation = type === 'investigation';
+            document.querySelector('#modal-diagnose .modal-title').innerHTML = isInvestigation
+                ? '<i class="fa-solid fa-magnifying-glass-chart" style="color:var(--danger);"></i> 一键排查'
+                : '<i class="fa-solid fa-stethoscope" style="color:var(--warning);"></i> 诊断卡点';
+            document.getElementById('diagnose-body').innerHTML = `
+                <div class="info-grid">
+                    <div class="info-card"><div class="info-label">生产工单</div><div class="info-value">${order.id}</div></div>
+                    <div class="info-card"><div class="info-label">当前状态</div><div class="info-value">${order.statusText}</div></div>
+                    <div class="info-card"><div class="info-label">当前工序</div><div class="info-value">${order.currentStage}</div></div>
+                    <div class="info-card"><div class="info-label">负责人</div><div class="info-value">${order.owner}</div></div>
+                </div>
+                ${renderCheckTable(order, type)}`;
+            document.getElementById('diagnose-footer').innerHTML = isInvestigation
+                ? (order.type === '质检返工'
+                    ? `<button class="btn btn-outline" onclick="openReworkAssign('${id}')">安排返工人员</button><button class="btn btn-primary" onclick="completeInvestigation('${id}')">排查完成</button>`
+                    : `<button class="btn btn-outline" onclick="openCorrection('${id}')">登记处理结果</button><button class="btn btn-primary" onclick="completeInvestigation('${id}')">排查完成</button>`)
+                : `<button class="btn btn-outline" onclick="closeModal('modal-diagnose')">关闭</button><button class="btn btn-primary" onclick="toggleDetail('${id}'); closeModal('modal-diagnose');">查看流水</button>`;
+            openModal('modal-diagnose');
+        }
+
+        function markCheckItem(orderId, type, index) {
+            const order = findOrder(orderId);
+            if (!order) return;
+            const list = type === 'investigation' ? order.investigations : order.checkpoints;
+            if (!list || !list[index]) return;
+            list[index].status = 'done';
+            list[index].result = type === 'investigation' ? '已排查' : '已检测';
+            openDiagnose(orderId, type);
+            showToast(type === 'investigation' ? '排查项目已完成' : '检测项已完成');
+        }
+
+        function addCheckItem(orderId, type) {
+            const order = findOrder(orderId);
+            if (!order) return;
+            const name = document.getElementById('new-check-name').value.trim();
+            const scope = document.getElementById('new-check-scope').value.trim();
+            if (!name || !scope) {
+                showToast('请填写项目名称和检测范围', true);
+                return;
+            }
+            const target = type === 'investigation' ? order.investigations : order.checkpoints;
+            target.push({ name, scope, result: type === 'investigation' ? '待排查' : '待检测', status: 'pending' });
+            openDiagnose(orderId, type);
+            showToast(type === 'investigation' ? '排查项目已添加' : '检测项已添加');
+        }
+
+        function todayDate(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+        function openReworkAssign(id) {
+            activeReworkOrder = id;
+            const order = findOrder(id);
+            if (!order) return;
+            document.getElementById('rwOrder').value = order.id;
+            document.getElementById('rwQc').value = order.qcId || '-';
+            document.getElementById('rwOwner').value = `${order.defectOwner || '待判定'} / ${order.defectOwnerType || '生产责任'}`;
+            document.getElementById('rwOwnerQty').value = `${order.defectQty || order.qty || 0} 双`;
+            document.getElementById('rwWorker').value = order.owner && !order.owner.includes('生产主管') ? order.owner : '李伟';
+            document.getElementById('rwQty').value = order.qty || 0;
+            document.getElementById('rwDue').value = todayDate();
+            document.getElementById('rwRemark').value = order.logs && order.logs[0] ? order.logs[0].param : '';
+            closeModal('modal-diagnose');
+            openModal('modal-rework-assign');
+        }
+        function saveReworkAssign() {
+            const order = findOrder(activeReworkOrder);
+            if (!order) return;
+            const worker = document.getElementById('rwWorker').value;
+            const process = document.getElementById('rwProcess').value;
+            const qty = Number(document.getElementById('rwQty').value || 0);
+            const due = document.getElementById('rwDue').value;
+            const remark = document.getElementById('rwRemark').value.trim();
+            if (!worker || qty <= 0) { showToast('请填写返工执行人和返工数量', true); return; }
+            order.owner = worker;
+            order.statusText = '待返工报工';
+            order.statusClass = 'tag-orange';
+            order.currentStage = process;
+            order.costText = `返工执行人：${worker}，责任：${order.defectOwner || '待判定'} / ${order.defectQty || 0}双`;
+            if (order.stages && order.stages[1]) Object.assign(order.stages[1], { operator:worker, qty, time:'刚刚', status:'active', percent:20 });
+            order.logs.unshift({ time:'刚刚', step:'返工安排', tag:'orange', person:'生产主管', qty:`${qty} 双`, cost:'返工工资待核算', param:`执行人：${worker}，工序：${process}，要求完成：${due || '-'}。${remark}` });
+            const assignments = JSON.parse(localStorage.getItem('erp_rework_assignments') || '[]').filter(x=>x.reworkTaskId !== order.reworkTaskId);
+            assignments.unshift({ id:'RWA-'+Date.now().toString().slice(-6), reworkTaskId:order.reworkTaskId, wo:order.id, qcId:order.qcId, order:order.source, product:order.product, worker, process, qty, due, remark, status:'待返工报工', defectOwner:order.defectOwner, defectQty:order.defectQty });
+            localStorage.setItem('erp_rework_assignments', JSON.stringify(assignments));
+            const tasks = JSON.parse(localStorage.getItem('erp_quality_rework_tasks') || '[]');
+            tasks.forEach(t=>{ if(t.id===order.reworkTaskId){ t.assignedWorker=worker; t.assignedProcess=process; t.assignedQty=qty; t.status='待返工报工'; } });
+            localStorage.setItem('erp_quality_rework_tasks', JSON.stringify(tasks));
+            closeModal('modal-rework-assign');
+            renderRows(getFilteredOrders());
+            showToast('返工人员已安排，返工报工将记录到该人员');
+        }
+
+        function completeInvestigation(id) {
+            const order = findOrder(id);
+            if (!order) return;
+            const pending = (order.investigations || []).some(item => item.status !== 'done');
+            if (pending) {
+                showToast('仍有待排查项目未完成', true);
+                return;
+            }
+            order.logs.unshift({ time: '刚刚', step: '排查完成', tag: 'green', person: '生产主管', qty: '已确认', param: '全部排查项目已完成，等待登记最终处置结果。' });
+            closeModal('modal-diagnose');
+            renderRows(getFilteredOrders());
+            showToast('排查已完成');
+        }
+
+        function closeBlockedOrder(id) {
+            const order = findOrder(id);
+            if (!order) return;
+            order.status = 'running';
+            order.statusText = '生产中';
+            order.statusClass = 'tag-orange';
+            order.logs.unshift({ time: '刚刚', step: '异常处置', tag: 'green', person: '生产主管', qty: '已处理', param: '异常已关闭，工单恢复跟踪。' });
+            closeModal('modal-diagnose');
+            renderRows(getFilteredOrders());
+            showToast('异常状态已关闭');
+        }
+
+        function openStageDetail(name, operator, time, qty, status) {
+            const statusText = status === 'done' ? '已完成' : status === 'active' ? '进行中' : status === 'error' ? '异常' : '未开始';
+            document.getElementById('stage-body').innerHTML = `
+                <div class="info-grid">
+                    <div class="info-card"><div class="info-label">工序名称</div><div class="info-value">${name}</div></div>
+                    <div class="info-card"><div class="info-label">工序状态</div><div class="info-value">${statusText}</div></div>
+                    <div class="info-card"><div class="info-label">负责人/工位</div><div class="info-value">${operator}</div></div>
+                    <div class="info-card"><div class="info-label">最近更新时间</div><div class="info-value">${time}</div></div>
+                </div>
+                <div class="diagnose-box">当前工序累计流转数量：${qty}。</div>`;
+            openModal('modal-stage');
+        }
+
+        function openCorrection(id) {
+            activeCorrectionOrder = id;
+            document.getElementById('correction-order').value = id;
+            document.getElementById('correction-qty').value = 0;
+            document.getElementById('correction-reason').value = '';
+            closeModal('modal-diagnose');
+            openModal('modal-correction');
+        }
+
+        function submitCorrection() {
+            const order = findOrder(activeCorrectionOrder);
+            if (!order) return;
+            const type = document.getElementById('correction-type').value;
+            const qty = Number(document.getElementById('correction-qty').value || 0);
+            const reason = document.getElementById('correction-reason').value.trim() || '人工调整';
+            order.logs.unshift({ time: '刚刚', step: type, tag: qty < 0 ? 'red' : 'green', person: '生产主管', qty: `${qty > 0 ? '+' : ''}${qty} 双`, param: reason });
+            if (type === '异常状态关闭') {
+                order.status = 'running';
+                order.statusText = '生产中';
+                order.statusClass = 'tag-orange';
+            }
+            closeModal('modal-correction');
+            renderRows(getFilteredOrders());
+            toggleDetail(order.id);
+            showToast('纠错记录已提交');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.className = isError ? 'toast error' : 'toast';
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'}" style="margin-right:8px; color:${isError ? 'var(--danger)' : 'var(--success)'};"></i>${message}`;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 1800);
+        }
+
+
+        function loadQualityReworkOrders() {
+            const tasks = JSON.parse(localStorage.getItem('erp_quality_rework_tasks') || '[]');
+            tasks.forEach(task => {
+                const id = task.wo || task.id;
+                if (!id || orders.some(o => o.id === id && o.source === (task.order || o.source))) return;
+                orders.unshift({
+                    id,
+                    type: '质检返工',
+                    source: task.order || '关联订单待回填',
+                    customer: '生产主管确认',
+                    product: task.product || '-',
+                    qty: Number(task.qty || 0),
+                    goodQty: 0,
+                    todayOutput: 0,
+                    progress: 0,
+                    status: 'blocked',
+                    statusText: '待返工补产',
+                    statusClass: 'tag-red',
+                    currentStage: '返工处理',
+                    owner: task.assignedWorker || '生产主管 / 车间组长',
+                    costStatus: '异常待确认',
+                    costText: `责任：${task.responsibleWorker || task.ownerWorker || '组长待判定'} / ${task.responsibleQty || task.responsibilityQty || task.qty || 0}双，返工执行：${task.assignedWorker || '待安排'}`,
+                    qcId: task.qcId,
+                    reworkTaskId: task.id,
+                    defectOwner: task.responsibleWorker || task.ownerWorker || '组长待判定',
+                    defectOwnerType: task.ownerType || '生产责任',
+                    defectQty: task.responsibleQty || task.responsibilityQty || task.qty || 0,
+                    checkpoints: [{ name:'返工任务接收', scope:'核对报工审核已审批的返工数量、报废数量和责任归属。', result:'待处理', status:'pending' }],
+                    investigations: [
+                        { name:'补产数量确认', scope:'生产主管确认需要返工/补产的数量。', result:'待排查', status:'pending' },
+                        { name:'返工人员安排', scope:'指定返工执行人，后续返工报工会记录到该人员。', result:'待排查', status:'pending' }
+                    ],
+                    stages: [
+                        { name:'质检不合格', percent:100, status:'error', lineDone:true, operator:'品检', qty:task.qty || 0, time:task.time || '刚刚' },
+                        { name:'返工审批', percent:100, status:'done', lineDone:true, operator:'报工审核/组长', qty:task.assignedQty || task.qty || 0, time:task.approveTime || task.time || '刚刚' },
+                        { name:'返工补产', percent:0, status:'todo', lineDone:false, operator:task.assignedWorker || '待安排', qty:0, time:'-' },
+                        { name:'复检', percent:0, status:'todo', lineDone:false, operator:'品检', qty:0, time:'-' }
+                    ],
+                    logs: [{ time:task.time || '刚刚', step:'报工审核分配返工', tag:'red', person:'生产组长', qty:`${task.qty || 0} 双`, param:`${task.qcId || ''} ${task.reason || ''}。责任：${task.responsibleWorker || task.ownerWorker || '组长待判定'} / ${task.responsibleQty || task.responsibilityQty || task.qty || 0}双，执行：${task.assignedWorker || '待安排'}。${task.remark || ''}` }]
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { loadQualityReworkOrders(); renderRows(orders); });
+    </script>
+</body>
+</html>

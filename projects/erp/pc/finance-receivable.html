@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宏通塑料鞋业 ERP - 应收管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sidebar-dark: #001529;
+            --sidebar-sub: #000c17;
+            --primary: #1890ff;
+            --primary-hover: #40a9ff;
+            --bg-body: #f0f2f5;
+            --border: #e8e8e8;
+            --text-main: #333333;
+            --danger: #f5222d;
+            --success: #52c41a;
+            --warning: #faad14;
+            --purple: #722ed1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC','Microsoft YaHei',sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; font-size: 13px; }
+        input, select, button, textarea { outline: none; font-family: inherit; }
+        .primary-sidebar { width: 85px; background-color: var(--sidebar-dark); display: flex; flex-direction: column; align-items: center; padding-top: 15px; z-index: 100; flex-shrink: 0; border-right: 1px solid #000; }
+        .ps-logo { width: 40px; height: 40px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231890ff"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>') center/contain no-repeat; margin-bottom: 20px; }
+        .ps-item { width: 100%; padding: 15px 0; display: flex; flex-direction: column; align-items: center; color: #a6adb4; cursor: pointer; transition: 0.2s; font-size: 12px; gap: 6px; }
+        .ps-item i { font-size: 20px; }
+        .ps-item:hover { color: #fff; }
+        .ps-item.active { background-color: var(--primary); color: #fff; }
+        .secondary-sidebar { width: 180px; background-color: var(--sidebar-sub); border-right: 1px solid #000; display: flex; flex-direction: column; flex-shrink: 0; z-index: 90; }
+        .ss-header { height: 60px; display: flex; align-items: center; padding-left: 20px; color: #fff; font-size: 15px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tree-menu { padding: 10px 0; overflow-y: auto; flex: 1; }
+        .tree-node { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; font-size: 13px; color: #a6adb4; transition: 0.2s; border-left: 3px solid transparent; }
+        .tree-node:hover { color: #fff; }
+        .tree-node.active { color: var(--primary); border-left-color: var(--primary); background: rgba(24,144,255,0.1); }
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); }
+        .top-header { height: 60px; background-color: var(--sidebar-dark); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; color: #fff; font-style: italic; font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .top-tools { display: flex; align-items: center; gap: 20px; font-size: 16px; font-weight: normal; font-style: normal; }
+        .tabs-bar { height: 45px; background-color: #fafafa; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; padding: 0 15px; gap: 5px; z-index: 10; }
+        .tab-item { padding: 10px 20px; font-size: 13px; color: #666; display: flex; align-items: center; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab-item.active { background-color: #fff; color: var(--primary); border: 1px solid var(--border); border-bottom: none; border-radius: 4px 4px 0 0; position: relative; top: 1px; font-weight: bold; }
+        .page-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; margin: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 20px; }
+        .filter-row { display: flex; gap: 20px; align-items: flex-end; margin-bottom: 14px; }
+        .filter-item { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .filter-item label { color: #333; font-size: 13px; font-weight: bold; }
+        .input-box, .form-input { padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 100%; transition: 0.3s; background: #fff; }
+        textarea.form-input { min-height: 74px; resize: vertical; }
+        select.input-box, select.form-input { appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%23999" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
+        .input-box:focus, .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(24,144,255,0.2); }
+        .btn { padding: 8px 15px; border-radius: 4px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent; transition: 0.2s; background: #fff; }
+        .btn-outline { border-color: #d9d9d9; color: #333; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-primary { background-color: var(--primary); color: #fff; border-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); color: #fff; border-color: var(--success); }
+        .btn-danger { background-color: var(--danger); color: #fff; border-color: var(--danger); }
+        .btn-warning { background-color: var(--warning); color: #fff; border-color: var(--warning); }
+        .summary-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; }
+        .summary-card { border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; background: #fafafa; }
+        .summary-title { color: #666; margin-bottom: 6px; }
+        .summary-value { font-size: 18px; font-weight: bold; }
+        .summary-card.primary { background: #f0f7ff; border-color: #91d5ff; }
+        .summary-card.warning { background: #fff7e6; border-color: #ffd591; }
+        .summary-card.danger { background: #fff1f0; border-color: #ffa39e; }
+        .summary-card.success { background: #f6ffed; border-color: #b7eb8f; }
+        .finance-tabs { display: flex; gap: 8px; margin: 0 0 14px; border-bottom: 1px solid var(--border); }
+        .finance-tab { padding: 10px 18px; cursor: pointer; color: #666; border-bottom: 2px solid transparent; font-size: 13px; }
+        .finance-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
+        .table-container { flex: 1; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; table-layout: fixed; }
+        th { background-color: #fafafa; padding: 13px 8px; color: #666; font-weight: normal; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
+        td { padding: 13px 8px; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; word-break: break-word; }
+        tr:hover td { background-color: #fafafa; }
+        .td-money { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .money-amount { font-family: monospace; font-weight: bold; text-align: right; }
+        .money-received { color: var(--success); font-size: 12px; }
+        .money-pending { color: var(--danger); font-size: 12px; font-weight: bold; }
+        .money-deduct { color: var(--success); font-weight: bold; font-family: monospace; }
+        .tag { padding: 4px 10px; border-radius: 4px; font-size: 12px; display: inline-block; border: 1px solid transparent; }
+        .tag-estimated { background: #e6f7ff; color: var(--primary); border-color: #91d5ff; }
+        .tag-pending { background: #fff7e6; color: var(--warning); border-color: #ffd591; }
+        .tag-formal { background: #f6ffed; color: var(--success); border-color: #b7eb8f; }
+        .tag-done { background: #f6ffed; color: var(--success); border-color: #b7eb8f; }
+        .tag-overdue { background: #fff1f0; color: var(--danger); border-color: #ffa39e; }
+        .tag-return { background: #f9f0ff; color: var(--purple); border-color: #d3adf7; }
+        .tag-abnormal { background: #fff1f0; color: var(--danger); border-color: #ffa39e; }
+        .action-link { color: var(--primary); cursor: pointer; text-decoration: none; display: inline-block; margin: 2px 4px; }
+        .action-link:hover { text-decoration: underline; }
+        .action-link.danger { color: var(--danger); }
+        .action-link.success { color: var(--success); }
+        .action-link.warning { color: var(--warning); }
+        .action-link.disabled { color: #ccc; pointer-events: none; text-decoration: none; }
+        .op-group { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 3px 5px; }
+        .empty-state { padding: 44px; text-align: center; color: #999; display: none; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.52); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: #fff; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.15); display: flex; flex-direction: column; animation: zoomIn 0.2s ease; max-height: 88vh; overflow: hidden; }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header { padding: 15px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 16px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px; }
+        .modal-close { cursor: pointer; color: #999; font-size: 18px; transition: 0.2s; }
+        .modal-close:hover { color: var(--danger); transform: rotate(90deg); }
+        .modal-body { padding: 22px 24px; overflow: auto; }
+        .modal-footer { padding: 15px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: #fafafa; border-radius: 0 0 8px 8px; }
+        #modal-detail .modal-box, #modal-voucher .modal-box, #modal-collection .modal-box, #modal-exception .modal-box { width: 760px; }
+        #modal-receipt .modal-box, #modal-offset .modal-box { width: 560px; }
+        .info-box { background: #f0f7ff; border-radius: 6px; padding: 15px 20px; margin-bottom: 18px; border: 1px dashed #91d5ff; }
+        .info-row { margin-bottom: 7px; color: #555; display: flex; justify-content: space-between; gap: 20px; }
+        .info-row:last-child { margin-bottom: 0; }
+        .info-amount { font-size: 20px; font-weight: bold; color: var(--danger); margin-top: 6px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full { grid-column: span 2; }
+        .form-label { font-size: 13px; color: #666; font-weight: bold; }
+        .form-label.req::before { content: '* '; color: var(--danger); }
+        .input-money { border-color: var(--success); color: var(--success); font-weight: bold; }
+        .upload-area { border: 1px dashed var(--primary); border-radius: 6px; background: #e6f7ff; padding: 22px; text-align: center; color: var(--primary); cursor: pointer; transition: 0.3s; }
+        .upload-area:hover { background: #bae0ff; }
+        .detail-grid { display: grid; grid-template-columns: 110px 1fr 110px 1fr; gap: 12px 16px; font-size: 13px; }
+        .detail-grid .label { color: #666; text-align: right; }
+        .detail-grid .value { color: #333; font-weight: 600; }
+        .detail-section-title { font-weight: bold; margin: 18px 0 10px; padding-left: 8px; border-left: 3px solid var(--primary); }
+        .mini-table { width: 100%; margin-top: 8px; border: 1px solid var(--border); table-layout: auto; }
+        .mini-table th, .mini-table td { padding: 10px 8px; }
+        .voucher-box { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; padding: 14px; line-height: 1.8; color: #555; }
+        .warning-box { background: #fff7e6; border: 1px solid #ffd591; border-radius: 6px; padding: 14px; line-height: 1.8; color: #555; }
+        .danger-box { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 6px; padding: 14px; line-height: 1.8; color: #555; }
+        .toast { position: fixed; top: 78px; right: 28px; z-index: 2000; background: #fff; border-left: 4px solid var(--success); box-shadow: 0 6px 18px rgba(0,0,0,.16); border-radius: 4px; padding: 12px 16px; display: none; min-width: 260px; }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        @keyframes flashSuccess { 0% { background-color: #f6ffed; } 100% { background-color: transparent; } }
+    </style>
+</head>
+<body>
+    <div class="primary-sidebar">
+        <div class="ps-logo"></div>
+        <div class="ps-item"><i class="fa-solid fa-house"></i><span>首页</span></div>
+        <div class="ps-item"><i class="fa-solid fa-database"></i><span>主数据</span></div>
+        <div class="ps-item"><i class="fa-solid fa-file-invoice-dollar"></i><span>订单管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-industry"></i><span>生产管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-warehouse"></i><span>仓库管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-cart-shopping"></i><span>采购管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-truck"></i><span>物流管理</span></div>
+        <div class="ps-item active"><i class="fa-solid fa-money-check-dollar"></i><span>财务管理</span></div>
+        <div class="ps-item"><i class="fa-solid fa-chart-line"></i><span>报表统计</span></div>
+    </div>
+    <div class="secondary-sidebar">
+        <div class="ss-header"><i class="fa-solid fa-money-check-dollar" style="margin-right:8px;"></i> 财务管理</div>
+        <div class="tree-menu">
+            <div class="tree-node active">应收管理</div>
+            <div class="tree-node">客户余额管理</div>
+            <div class="tree-node">应付管理</div>
+            <div class="tree-node">成本核算</div>
+            <div class="tree-node">财务报表</div>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="top-header">
+            <div>宏通塑料鞋业ERP制造执行系统</div>
+            <div class="top-tools">
+                <i class="fa-solid fa-expand"></i> <i class="fa-solid fa-magnifying-glass"></i> <i class="fa-regular fa-bell"></i>
+                <div style="font-size:14px; margin-left:10px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-user-circle" style="font-size:20px;"></i> 财务出纳</div>
+            </div>
+        </div>
+        <div class="tabs-bar">
+            <div class="tab-item">财务管理</div>
+            <div class="tab-item active"><span style="color:var(--primary);">应收账款工作台 <i class="fa-solid fa-xmark"></i></span></div>
+        </div>
+        <div class="page-content">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label>应收账单号</label>
+                    <input type="text" id="filter-bill" class="input-box" placeholder="请输入">
+                </div>
+                <div class="filter-item">
+                    <label>关联发货 / 订单单号</label>
+                    <input type="text" id="filter-ref" class="input-box" placeholder="请输入">
+                </div>
+                <div class="filter-item">
+                    <label>应收阶段</label>
+                    <select id="filter-stage" class="input-box">
+                        <option value="全部">全部</option>
+                        <option value="预计应收">预计应收</option>
+                        <option value="待确认应收">待确认应收</option>
+                        <option value="正式应收">正式应收</option>
+                        <option value="逾期未收">逾期未收</option>
+                        <option value="已收款">已收款</option>
+                        <option value="退货冲账待处理">退货冲账待处理</option>
+                        <option value="异常挂起">异常挂起</option>
+                    </select>
+                </div>
+                <div class="filter-item" style="flex:0; flex-direction:row; align-items:flex-end; gap:10px;">
+                    <button class="btn btn-outline" onclick="applySearch()"><i class="fa-solid fa-magnifying-glass"></i> 搜索</button>
+                    <button class="btn btn-outline" onclick="resetSearch()"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card primary"><div class="summary-title">预计应收</div><div class="summary-value" id="sum-estimated">¥0</div></div>
+                <div class="summary-card warning"><div class="summary-title">待确认应收</div><div class="summary-value" id="sum-pending">¥0</div></div>
+                <div class="summary-card success"><div class="summary-title">正式待收</div><div class="summary-value" id="sum-formal">¥0</div></div>
+                <div class="summary-card danger"><div class="summary-title">逾期未收</div><div class="summary-value" id="sum-overdue">¥0</div></div>
+                <div class="summary-card"><div class="summary-title">本页已收款</div><div class="summary-value" id="sum-received">¥0</div></div>
+            </div>
+
+            <div class="finance-tabs">
+                <div class="finance-tab active" data-tab="全部" onclick="switchStageTab(this)">全部</div>
+                <div class="finance-tab" data-tab="预计应收" onclick="switchStageTab(this)">预计应收</div>
+                <div class="finance-tab" data-tab="待确认应收" onclick="switchStageTab(this)">待确认</div>
+                <div class="finance-tab" data-tab="正式应收" onclick="switchStageTab(this)">正式应收</div>
+                <div class="finance-tab" data-tab="逾期未收" onclick="switchStageTab(this)">逾期</div>
+                <div class="finance-tab" data-tab="退货冲账待处理" onclick="switchStageTab(this)">退货冲账</div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:12%;">应收单号</th>
+                            <th style="width:14%;">触发来源</th>
+                            <th style="width:12%;">结算客户</th>
+                            <th style="width:10%; text-align:right;">应收金额</th>
+                            <th style="width:10%; text-align:right;">余额/退货冲抵</th>
+                            <th style="width:12%;">已收 / 待收</th>
+                            <th style="width:13%;">触发节点</th>
+                            <th style="width:9%;">应收阶段</th>
+                            <th style="width:16%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receivable-tbody"></tbody>
+                </table>
+                <div id="empty-state" class="empty-state"><i class="fa-regular fa-folder-open" style="font-size:28px;margin-bottom:10px;"></i><br>暂无符合条件的应收记录</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-detail" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-file-invoice-dollar"></i> 应收详情</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-detail')"></i></div>
+            <div class="modal-body" id="detail-body"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-detail')">关闭</button></div>
+        </div>
+    </div>
+
+    <div id="modal-receipt" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-money-bill-transfer"></i> 登记收款</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-receipt')"></i></div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <div class="info-row"><span>目标账单</span><strong id="receipt-bill-no">--</strong></div>
+                    <div class="info-row"><span>结算客户</span><strong id="receipt-customer">--</strong></div>
+                    <div class="info-row"><span>余额/退货已冲抵</span><strong id="receipt-deduct">¥0.00</strong></div>
+                    <div style="margin-top:8px;color:#555;">当前待收金额：</div>
+                    <div class="info-amount" id="receipt-pending">¥0.00</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label req">实际收到金额</label><input type="number" id="receipt-amount" class="form-input input-money"></div>
+                    <div class="form-group"><label class="form-label req">银行到账时间</label><input type="datetime-local" id="receipt-time" class="form-input"></div>
+                    <div class="form-group"><label class="form-label req">收款方式</label><select id="receipt-method" class="form-input"><option>企业公户转账</option><option>现金</option><option>微信/支付宝</option><option>银行承兑汇票</option><option>客户余额抵扣</option></select></div>
+                    <div class="form-group"><label class="form-label">收款账号</label><input id="receipt-account" class="form-input" value="中国银行 6658"></div>
+                    <div class="form-group full"><label class="form-label">备注</label><textarea id="receipt-remark" class="form-input" placeholder="例如：客户分批付款，本次核销部分货款"></textarea></div>
+                    <div class="form-group full"><label class="form-label">收款凭证</label><div class="upload-area" onclick="mockUpload(this)"><i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;margin-bottom:8px;"></i><br><span>点击上传银行回单 / 水单</span></div></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-receipt')">取消</button><button class="btn btn-success" onclick="submitReceipt()">确认收款并核销</button></div>
+        </div>
+    </div>
+
+    <div id="modal-voucher" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-receipt"></i> 收款凭证与核销流水</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-voucher')"></i></div>
+            <div class="modal-body" id="voucher-body"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="printVoucher()"><i class="fa-solid fa-print"></i> 打印</button><button class="btn btn-outline" onclick="closeModal('modal-voucher')">关闭</button></div>
+        </div>
+    </div>
+
+    <div id="modal-collection" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-phone-volume"></i> 催收登记</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-collection')"></i></div>
+            <div class="modal-body">
+                <div class="warning-box" id="collection-info"></div>
+                <div class="form-grid" style="margin-top:18px;">
+                    <div class="form-group"><label class="form-label req">催收方式</label><select id="collection-method" class="form-input"><option>电话沟通</option><option>微信通知</option><option>短信通知</option><option>邮件通知</option><option>上门拜访</option></select></div>
+                    <div class="form-group"><label class="form-label req">预计回款日期</label><input type="date" id="collection-plan-date" class="form-input"></div>
+                    <div class="form-group full"><label class="form-label req">催收结果</label><textarea id="collection-result" class="form-input" placeholder="例如：客户确认三日内付款，已同步销售负责人跟进"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-collection')">取消</button><button class="btn btn-warning" onclick="submitCollection()">保存催收记录</button></div>
+        </div>
+    </div>
+
+    <div id="modal-exception" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-triangle-exclamation"></i> 应收异常处理</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-exception')"></i></div>
+            <div class="modal-body">
+                <div class="danger-box" id="exception-info"></div>
+                <div class="form-grid" style="margin-top:18px;">
+                    <div class="form-group"><label class="form-label req">异常类型</label><select id="exception-type" class="form-input"><option>客户金额异议</option><option>发货/签收差异</option><option>退货待冲账</option><option>价格审批异常</option><option>账期争议</option></select></div>
+                    <div class="form-group"><label class="form-label req">处理责任人</label><input id="exception-owner" class="form-input" value="财务主管"></div>
+                    <div class="form-group full"><label class="form-label req">异常说明</label><textarea id="exception-remark" class="form-input" placeholder="请输入异常原因和后续处理要求"></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-exception')">取消</button><button class="btn btn-danger" onclick="submitException()">挂起应收</button></div>
+        </div>
+    </div>
+
+    <div id="modal-offset" class="modal-overlay">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header"><span class="modal-title"><i class="fa-solid fa-right-left"></i> 退货冲账确认</span><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-offset')"></i></div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <div class="info-row"><span>退货单</span><strong id="offset-return-no">--</strong></div>
+                    <div class="info-row"><span>原订单</span><strong id="offset-order-no">--</strong></div>
+                    <div class="info-row"><span>客户</span><strong id="offset-customer">--</strong></div>
+                    <div style="margin-top:8px;color:#555;">本次冲账金额：</div>
+                    <div class="info-amount" id="offset-amount">¥0.00</div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group"><label class="form-label req">处理方式</label><select id="offset-method" class="form-input"><option>冲抵原应收</option><option>退回客户余额</option><option>原路退款</option></select></div>
+                    <div class="form-group"><label class="form-label req">处理日期</label><input type="date" id="offset-date" class="form-input"></div>
+                    <div class="form-group full"><label class="form-label">备注</label><textarea id="offset-remark" class="form-input">退货质检通过，按最终退款金额冲抵原应收。</textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-offset')">取消</button><button class="btn btn-primary" onclick="submitOffset()">确认冲账</button></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const money = n => '¥ ' + Number(n || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const todayDate = () => new Date().toISOString().slice(0, 10);
+        const nowLocal = () => {
+            const d = new Date();
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            return d.toISOString().slice(0, 16);
+        };
+        const statusClass = {
+            '预计应收': 'tag-estimated',
+            '待确认应收': 'tag-pending',
+            '正式应收': 'tag-formal',
+            '已收款': 'tag-done',
+            '已结清': 'tag-done',
+            '逾期未收': 'tag-overdue',
+            '退货冲账待处理': 'tag-return',
+            '冲账完成': 'tag-done',
+            '异常挂起': 'tag-abnormal'
+        };
+        let activeTab = '全部';
+        let currentBillId = null;
+
+        const receivables = [
+            {
+                id: 'EAR-250602-001', ref: 'ORD-250602-003', refSub: '订单审核通过', customer: '深圳跨境园区', amount: 96000, deduct: 0, received: 0, pending: 96000,
+                node: '订单审核通过', nodeSub: '尚未出库/签收', stage: '预计应收', term: '订单审核后生成预计应收', dueDate: '2026-06-08', owner: '销售会计',
+                source: { type: '订单', no: 'ORD-250602-003', route: '订单管理 / 订单跟踪', snapshot: '黑色拖鞋 3200双，客户账期30天，未发生出库。' }, logs: ['2026-06-02 09:18:22 订单审核通过，生成预计应收。']
+            },
+            {
+                id: 'PAR-250601-009', ref: 'OUT-250601-009', refSub: 'ORD-250526-011', customer: '东莞批发客户', amount: 31200, deduct: 0, received: 0, pending: 31200,
+                node: '已出库待签收', nodeSub: '现结客户，需确认签收/对账', stage: '待确认应收', term: '签收后转正式应收', dueDate: '2026-06-03', owner: '财务出纳',
+                source: { type: '出库单', no: 'OUT-250601-009', route: '仓库管理 / 成品出库', snapshot: '关联订单 ORD-250526-011，已完成出库，物流签收未回传。' }, logs: ['2026-06-01 16:30:11 成品出库，进入待确认应收。']
+            },
+            {
+                id: 'AR-2311-001', ref: 'SIGN-1102', refSub: 'ORD-1105-01', customer: '广州十三行贸易', amount: 180000, deduct: 10000, received: 60000, pending: 110000,
+                node: '客户签收确认', nodeSub: '货到30天内结清', stage: '正式应收', term: '月结30天', dueDate: '2026-06-10', owner: '财务出纳',
+                source: { type: '签收单', no: 'SIGN-1102', route: '物流管理 / 签收追踪', snapshot: '订单 ORD-1105-01 已签收，余额抵扣10000，剩余110000待收。' }, logs: ['2026-05-11 10:20:10 客户签收确认。', '2026-05-11 10:24:35 转正式应收。', '2026-05-18 14:05:12 收款60000，剩余110000。']
+            },
+            {
+                id: 'AR-250520-016', ref: 'SIGN-250520-016', refSub: 'ORD-250520-016', customer: '广州十三行张总', amount: 42000, deduct: 5000, received: 37000, pending: 0,
+                node: '签收后结清', nodeSub: '05-23 完成', stage: '已收款', term: '现结', dueDate: '2026-05-23', owner: '财务出纳',
+                source: { type: '签收单', no: 'SIGN-250520-016', route: '物流管理 / 签收追踪', snapshot: '订单已签收，余额抵扣5000，收款37000后结清。' }, voucher: 'RV-250523-001', logs: ['2026-05-23 10:12:33 收款37000。', '2026-05-23 10:15:02 应收核销完成。']
+            },
+            {
+                id: 'AR-250430-002', ref: 'SIGN-250430-02', refSub: 'ORD-250430-02', customer: '临沂批发客户', amount: 18600, deduct: 0, received: 0, pending: 18600,
+                node: '月结30天', nodeSub: '已逾期 6 天', stage: '逾期未收', term: '月结30天', dueDate: '2026-05-27', owner: '财务主管',
+                source: { type: '签收单', no: 'SIGN-250430-02', route: '物流管理 / 签收追踪', snapshot: '客户已签收，超过账期未回款。' }, collectionLogs: [], logs: ['2026-04-30 17:05:48 客户签收。', '2026-05-27 00:00:00 超出账期，转逾期未收。']
+            },
+            {
+                id: 'AR-RET-002', ref: 'RET-250602-003', refSub: 'ORD-016', customer: '广州十三行张总', amount: -26800, deduct: 26800, received: 0, pending: 26800,
+                node: '退货质检后', nodeSub: '等待财务退款/冲账', stage: '退货冲账待处理', term: '退货冲账', dueDate: '2026-06-02', owner: '财务主管',
+                source: { type: '退货单', no: 'RET-250602-003', route: '订单管理 / 退货管理', snapshot: '退货数量800双，质检通过，最终退款/冲账金额26800。' }, logs: ['2026-06-02 11:03:20 仓库确认退货入库。', '2026-06-02 15:26:41 质检通过，等待财务处理。']
+            }
+        ];
+
+        function renderTable() {
+            const tbody = document.getElementById('receivable-tbody');
+            const billFilter = document.getElementById('filter-bill').value.trim().toLowerCase();
+            const refFilter = document.getElementById('filter-ref').value.trim().toLowerCase();
+            const stageFilter = document.getElementById('filter-stage').value;
+            const rows = receivables.filter(item => {
+                const billOk = !billFilter || item.id.toLowerCase().includes(billFilter);
+                const refOk = !refFilter || item.ref.toLowerCase().includes(refFilter) || item.refSub.toLowerCase().includes(refFilter) || item.customer.toLowerCase().includes(refFilter);
+                const selectOk = stageFilter === '全部' || item.stage === stageFilter;
+                const tabOk = activeTab === '全部' || item.stage === activeTab;
+                return billOk && refOk && selectOk && tabOk;
+            });
+            tbody.innerHTML = rows.map(item => `
+                <tr data-id="${item.id}" style="${rowBg(item.stage)}">
+                    <td>${item.id}</td>
+                    <td><span class="action-link" onclick="openRelated('${item.id}')">${item.ref}</span><br><span style="color:#999;">${item.refSub}</span></td>
+                    <td>${item.customer}</td>
+                    <td class="money-amount">${money(item.amount)}</td>
+                    <td class="money-deduct">${money(item.deduct)}</td>
+                    <td><div class="td-money"><span class="money-received">已收 ${money(item.received)}</span><span class="money-pending">${pendingLabel(item)}</span></div></td>
+                    <td>${item.node}<br><span style="color:#999;font-size:12px;">${item.nodeSub}</span></td>
+                    <td><span class="tag ${statusClass[item.stage] || 'tag-pending'}">${item.stage}</span></td>
+                    <td><div class="op-group">${actionsHtml(item)}</div></td>
+                </tr>`).join('');
+            document.getElementById('empty-state').style.display = rows.length ? 'none' : 'block';
+            updateSummary();
+        }
+
+        function rowBg(stage) {
+            if (stage === '预计应收') return 'background:#f8fbff;';
+            if (stage === '待确认应收' || stage === '退货冲账待处理') return 'background:#fffaf0;';
+            if (stage === '逾期未收' || stage === '异常挂起') return 'background:#fff1f0;';
+            return '';
+        }
+        function pendingLabel(item) {
+            if (item.stage === '预计应收') return '预计待收 ' + money(item.pending);
+            if (item.stage === '待确认应收') return '待确认 ' + money(item.pending);
+            if (item.stage === '逾期未收') return '逾期 ' + money(item.pending);
+            if (item.stage === '退货冲账待处理') return '冲账待确认';
+            if (item.pending <= 0) return '待收 ¥ 0.00';
+            return '待收 ' + money(item.pending);
+        }
+        function actionsHtml(item) {
+            const detail = `<span class="action-link" onclick="openDetail('${item.id}')">查看</span>`;
+            const related = `<span class="action-link" onclick="openRelated('${item.id}')">关联业务</span>`;
+            if (item.stage === '预计应收') return `${detail}<span class="action-link success" onclick="convertEstimatedToPending('${item.id}')">转待确认</span>${related}`;
+            if (item.stage === '待确认应收') return `${detail}<span class="action-link success" onclick="confirmFormalAR('${item.id}')">确认应收</span>${related}`;
+            if (item.stage === '正式应收') return `${detail}<span class="action-link success" onclick="openReceipt('${item.id}')">登记收款</span><span class="action-link danger" onclick="openException('${item.id}')">异常</span>`;
+            if (item.stage === '逾期未收') return `${detail}<span class="action-link warning" onclick="openCollection('${item.id}')">催收</span><span class="action-link success" onclick="openReceipt('${item.id}')">收款</span>`;
+            if (item.stage === '已收款' || item.stage === '已结清') return `${detail}<span class="action-link" onclick="openVoucher('${item.id}')">查看凭证</span>`;
+            if (item.stage === '退货冲账待处理') return `${detail}<span class="action-link success" onclick="openOffset('${item.id}')">确认冲账</span>${related}`;
+            if (item.stage === '异常挂起') return `${detail}<span class="action-link success" onclick="releaseException('${item.id}')">解除挂起</span>`;
+            return detail;
+        }
+        function updateSummary() {
+            const sum = (predicate, field='pending') => receivables.filter(predicate).reduce((a, b) => a + Number(b[field] || 0), 0);
+            document.getElementById('sum-estimated').innerText = money(sum(x => x.stage === '预计应收'));
+            document.getElementById('sum-pending').innerText = money(sum(x => x.stage === '待确认应收'));
+            document.getElementById('sum-formal').innerText = money(sum(x => x.stage === '正式应收' || x.stage === '逾期未收'));
+            document.getElementById('sum-overdue').innerText = money(sum(x => x.stage === '逾期未收'));
+            document.getElementById('sum-received').innerText = money(receivables.reduce((a, b) => a + Number(b.received || 0), 0));
+        }
+        function applySearch() { renderTable(); showToast('已按条件筛选应收记录'); }
+        function resetSearch() {
+            document.getElementById('filter-bill').value = '';
+            document.getElementById('filter-ref').value = '';
+            document.getElementById('filter-stage').value = '全部';
+            activeTab = '全部';
+            document.querySelectorAll('.finance-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === '全部'));
+            renderTable();
+            showToast('查询条件已重置');
+        }
+        function switchStageTab(el) {
+            document.querySelectorAll('.finance-tab').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+            activeTab = el.dataset.tab;
+            renderTable();
+        }
+        function getBill(id) { return receivables.find(x => x.id === id); }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; if (id !== 'modal-receipt') currentBillId = null; }
+        function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function flashRow(id) {
+            setTimeout(() => {
+                const row = document.querySelector(`tr[data-id="${id}"]`);
+                if (row) row.style.animation = 'flashSuccess 1.5s ease';
+            }, 50);
+        }
+        function openDetail(id) {
+            const item = getBill(id);
+            document.getElementById('detail-body').innerHTML = `
+                <div class="detail-grid">
+                    <div class="label">应收单号</div><div class="value">${item.id}</div><div class="label">应收阶段</div><div class="value"><span class="tag ${statusClass[item.stage]}">${item.stage}</span></div>
+                    <div class="label">结算客户</div><div class="value">${item.customer}</div><div class="label">责任人</div><div class="value">${item.owner}</div>
+                    <div class="label">应收金额</div><div class="value">${money(item.amount)}</div><div class="label">待收金额</div><div class="value">${money(item.pending)}</div>
+                    <div class="label">冲抵金额</div><div class="value">${money(item.deduct)}</div><div class="label">账期/到期日</div><div class="value">${item.term} / ${item.dueDate}</div>
+                    <div class="label">触发来源</div><div class="value">${item.source.type}：${item.source.no}</div><div class="label">触发节点</div><div class="value">${item.node}</div>
+                </div>
+                <div class="detail-section-title">关联业务快照</div>
+                <div class="info-box"><div>${item.source.snapshot}</div><div style="margin-top:8px;color:#666;">跳转位置：${item.source.route}</div></div>
+                <div class="detail-section-title">流转记录</div>
+                <table class="mini-table"><thead><tr><th>时间</th><th>记录</th></tr></thead><tbody>${item.logs.map(log => `<tr><td>${log.slice(0,19)}</td><td style="text-align:left;">${log.slice(20)}</td></tr>`).join('')}</tbody></table>
+            `;
+            showModal('modal-detail');
+        }
+        function openRelated(id) {
+            const item = getBill(id);
+            document.getElementById('detail-body').innerHTML = `
+                <div class="info-box"><strong>${item.source.type}：${item.source.no}</strong><div style="margin-top:8px;">${item.source.snapshot}</div></div>
+                <div class="detail-grid">
+                    <div class="label">业务类型</div><div class="value">${item.source.type}</div><div class="label">业务单号</div><div class="value">${item.source.no}</div>
+                    <div class="label">关联客户</div><div class="value">${item.customer}</div><div class="label">关联金额</div><div class="value">${money(item.amount)}</div>
+                    <div class="label">跳转位置</div><div class="value">${item.source.route}</div><div class="label">当前状态</div><div class="value">${item.stage}</div>
+                </div>
+            `;
+            showModal('modal-detail');
+            showToast('已打开关联业务快照；正式接接口后可跳转对应业务单据。');
+        }
+        function convertEstimatedToPending(id) {
+            const item = getBill(id);
+            item.id = item.id.replace('EAR', 'PAR');
+            item.stage = '待确认应收';
+            item.node = '已出库待签收';
+            item.nodeSub = '由预计应收转入待确认应收';
+            item.logs.push(`${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 订单已出库，预计应收转待确认应收。`);
+            renderTable(); flashRow(item.id); showToast('已转为待确认应收');
+        }
+        function confirmFormalAR(id) {
+            const item = getBill(id);
+            item.id = item.id.replace('PAR', 'AR');
+            item.stage = '正式应收';
+            item.node = '签收/对账确认';
+            item.nodeSub = '已进入正式应收账款池';
+            item.logs.push(`${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 签收/对账确认，转正式应收。`);
+            renderTable(); flashRow(item.id); showToast('已确认为正式应收，可登记收款。');
+        }
+        function openReceipt(id) {
+            const item = getBill(id);
+            if (!['正式应收','逾期未收'].includes(item.stage)) { showToast('当前阶段不能登记收款', 'warning'); return; }
+            currentBillId = id;
+            document.getElementById('receipt-bill-no').innerText = item.id;
+            document.getElementById('receipt-customer').innerText = item.customer;
+            document.getElementById('receipt-deduct').innerText = money(item.deduct);
+            document.getElementById('receipt-pending').innerText = money(item.pending);
+            document.getElementById('receipt-amount').value = item.pending;
+            document.getElementById('receipt-time').value = nowLocal();
+            document.getElementById('receipt-remark').value = '';
+            showModal('modal-receipt');
+        }
+        function submitReceipt() {
+            const item = getBill(currentBillId);
+            const amount = Number(document.getElementById('receipt-amount').value || 0);
+            if (!item) return;
+            if (amount <= 0) { showToast('请输入有效收款金额', 'error'); return; }
+            if (amount > item.pending) { showToast('收款金额不能超过待收金额', 'error'); return; }
+            item.received += amount;
+            item.pending = Math.max(0, item.pending - amount);
+            item.voucher = item.voucher || `RV-${new Date().toISOString().slice(2,10).replaceAll('-', '')}-${Math.floor(Math.random()*900+100)}`;
+            item.logs.push(`${document.getElementById('receipt-time').value.replace('T', ' ')} 收款${money(amount)}，方式：${document.getElementById('receipt-method').value}。`);
+            if (item.pending === 0) {
+                item.stage = '已收款';
+                item.node = '收款核销完成';
+                item.nodeSub = '正式应收已结清';
+                item.logs.push(`${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 应收账款核销完成。`);
+            }
+            closeModal('modal-receipt');
+            renderTable(); flashRow(item.id); showToast(item.pending === 0 ? '收款登记成功，应收已结清' : '部分收款登记成功，待收金额已更新');
+        }
+        function openVoucher(id) {
+            const item = getBill(id);
+            document.getElementById('voucher-body').innerHTML = `
+                <div class="voucher-box">
+                    <div><strong>凭证号：</strong>${item.voucher || '暂未生成正式凭证'}</div>
+                    <div><strong>应收单号：</strong>${item.id}</div>
+                    <div><strong>客户：</strong>${item.customer}</div>
+                    <div><strong>累计收款：</strong>${money(item.received)}</div>
+                    <div><strong>冲抵金额：</strong>${money(item.deduct)}</div>
+                    <div><strong>核销状态：</strong>${item.pending === 0 ? '已结清' : '部分核销'}</div>
+                </div>
+                <div class="detail-section-title">核销流水</div>
+                <table class="mini-table"><thead><tr><th>时间</th><th>记录</th></tr></thead><tbody>${item.logs.map(log => `<tr><td>${log.slice(0,19)}</td><td style="text-align:left;">${log.slice(20)}</td></tr>`).join('')}</tbody></table>
+            `;
+            showModal('modal-voucher');
+        }
+        function openCollection(id) {
+            const item = getBill(id);
+            currentBillId = id;
+            document.getElementById('collection-info').innerHTML = `<strong>${item.id} / ${item.customer}</strong><br>逾期待收：${money(item.pending)}，到期日：${item.dueDate}。保存后会写入客户往来日志。`;
+            document.getElementById('collection-plan-date').value = todayDate();
+            document.getElementById('collection-result').value = '';
+            showModal('modal-collection');
+        }
+        function submitCollection() {
+            const item = getBill(currentBillId);
+            if (!item) return;
+            const result = document.getElementById('collection-result').value.trim();
+            if (!result) { showToast('请填写催收结果', 'error'); return; }
+            const log = `${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 催收：${document.getElementById('collection-method').value}，预计回款${document.getElementById('collection-plan-date').value}，${result}`;
+            item.logs.push(log);
+            item.collectionLogs = item.collectionLogs || [];
+            item.collectionLogs.push(log);
+            closeModal('modal-collection');
+            renderTable(); flashRow(item.id); showToast('催收记录已保存，并写入客户往来日志。');
+        }
+        function openException(id) {
+            const item = getBill(id);
+            currentBillId = id;
+            document.getElementById('exception-info').innerHTML = `<strong>${item.id} / ${item.customer}</strong><br>当前待收：${money(item.pending)}。挂起后该应收不会进入常规催收和收款核销，需解除挂起后继续处理。`;
+            document.getElementById('exception-remark').value = '';
+            showModal('modal-exception');
+        }
+        function submitException() {
+            const item = getBill(currentBillId);
+            const remark = document.getElementById('exception-remark').value.trim();
+            if (!remark) { showToast('请填写异常说明', 'error'); return; }
+            item.previousStage = item.stage;
+            item.stage = '异常挂起';
+            item.node = '应收异常挂起';
+            item.nodeSub = document.getElementById('exception-type').value;
+            item.logs.push(`${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 异常挂起：${remark}，责任人：${document.getElementById('exception-owner').value}。`);
+            closeModal('modal-exception');
+            renderTable(); flashRow(item.id); showToast('应收已挂起，等待异常处理。', 'warning');
+        }
+        function releaseException(id) {
+            const item = getBill(id);
+            item.stage = item.previousStage || '正式应收';
+            item.node = '异常已解除';
+            item.nodeSub = '恢复应收处理';
+            item.logs.push(`${new Date().toLocaleString('zh-CN', { hour12:false }).replaceAll('/', '-')} 异常解除，恢复${item.stage}。`);
+            renderTable(); flashRow(item.id); showToast('异常已解除，账单恢复处理。');
+        }
+        function openOffset(id) {
+            const item = getBill(id);
+            currentBillId = id;
+            document.getElementById('offset-return-no').innerText = item.source.no;
+            document.getElementById('offset-order-no').innerText = item.refSub;
+            document.getElementById('offset-customer').innerText = item.customer;
+            document.getElementById('offset-amount').innerText = money(item.deduct);
+            document.getElementById('offset-date').value = todayDate();
+            showModal('modal-offset');
+        }
+        function submitOffset() {
+            const item = getBill(currentBillId);
+            if (!item) return;
+            item.stage = '冲账完成';
+            item.pending = 0;
+            item.node = '退货冲账完成';
+            item.nodeSub = document.getElementById('offset-method').value;
+            item.logs.push(`${document.getElementById('offset-date').value} ${document.getElementById('offset-method').value}，金额${money(item.deduct)}。备注：${document.getElementById('offset-remark').value}`);
+            closeModal('modal-offset');
+            renderTable(); flashRow(item.id); showToast('退货冲账已完成，原应收和客户余额已同步调整。');
+        }
+        function mockUpload(el) {
+            el.innerHTML = '<i class="fa-solid fa-circle-check" style="font-size:24px;margin-bottom:8px;"></i><br><span>已选择凭证：bank_receipt_mock.jpg</span>';
+        }
+        function printVoucher() { showToast('已生成打印任务'); }
+        function showToast(text, type='success') {
+            const toast = document.getElementById('toast');
+            toast.className = `toast ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+            toast.innerText = text;
+            toast.style.display = 'block';
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => toast.style.display = 'none', 2200);
+        }
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) event.target.style.display = 'none';
+        };
+        renderTable();
+    </script>
+</body>
+</html>
